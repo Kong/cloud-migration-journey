@@ -1,0 +1,23 @@
+---
+- name: Check if Service Token Exists
+  ansible.builtin.stat:
+    path: '/home/kuma/{{ service_name }}-service.token'
+  register: st_token
+  delegate_to: "{{ global_cp }}"
+  become: true
+
+- name: Create Service Token 
+  ansible.builtin.shell: "/home/kuma/mesh/kong-mesh-1.8.1/bin/kumactl generate dataplane-token --name {{ service_name }} > {{ service_name }}-service.token"
+  args: 
+    chdir: /home/kuma/
+  when: not st_token.stat.exists
+  delegate_to: "{{ global_cp }}"
+  become: true
+
+- name: Fetch Service Token from Global CP to Bastion
+  ansible.builtin.fetch: 
+    src: "/home/kuma/{{ service_name }}-service.token"
+    dest: "{{ playbook_dir }}/tokens/{{ service_name }}-service.token"
+    flat: yes
+  delegate_to: "{{ global_cp }}"
+  become: true

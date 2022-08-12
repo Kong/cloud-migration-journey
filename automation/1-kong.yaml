@@ -1,0 +1,57 @@
+_format_version: "1.1"
+_konnect:
+  runtime_group_name: default
+services:
+- connect_timeout: 60000
+  enabled: true
+  host: 10.0.0.31
+  name: CreditCard
+  port: 8080
+  protocol: http
+  read_timeout: 60000
+  retries: 5
+  routes:
+  - https_redirect_status_code: 426
+    methods:
+    - GET
+    - POST
+    name: monolith
+    path_handling: v0
+    paths:
+    - /monolith/resources/card/
+    plugins:
+    - config:
+        day: null
+        fault_tolerant: true
+        header_name: null
+        hide_client_headers: false
+        hour: null
+        limit_by: consumer
+        minute: 3
+        month: null
+        path: null
+        policy: local
+        redis_database: 0
+        redis_host: null
+        redis_password: null
+        redis_port: 6379
+        redis_server_name: null
+        redis_ssl: false
+        redis_ssl_verify: false
+        redis_timeout: 2000
+        redis_username: null
+        second: null
+        year: null
+      enabled: true
+      name: rate-limiting
+      protocols:
+      - grpc
+      - grpcs
+      - http
+      - https
+    preserve_host: false
+    protocols:
+    - http
+    regex_priority: 0
+    strip_path: false
+  write_timeout: 60000

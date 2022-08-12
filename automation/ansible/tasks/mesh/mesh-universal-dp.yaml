@@ -1,0 +1,62 @@
+---
+# tasks file for mesh-universal-dp 
+- debug: 
+    msg: "Dataplane {{ dataplane }}"
+
+- block:
+    - name: Create Dataplane Tokens
+      ansible.builtin.include_tasks: 
+        file: "tasks/mesh/dataplane-token.yaml"
+      vars:
+        global_cp: "{{ global_cp_addr }}"
+        service_name: "{{ dataplane['name'] }}"
+
+    - name: Put Token on Host
+      ansible.builtin.copy:
+        src: "tokens/{{ dataplane['name'] }}-service.token"
+        dest: "/home/kuma/{{ dataplane['name'] }}-service.token"
+        owner: kuma 
+        group: kuma
+        mode: '0644'
+
+    - name: Push Gateway Dataplane Manifest
+      ansible.builtin.template: 
+        src: "templates/gateway-nontransparent.yaml.j2"
+        dest: "/home/kuma/dataplane-nontransparent.yaml"
+        owner: kuma 
+        group: kuma 
+        mode: '0644'
+      vars:
+        service: "{{ dataplane['name'] }}"
+        outbound_kuma_service: "{{ dataplane['dp_manifest']['outbound']['tags']['kuma_service'] }}"
+      when: dataplane['dp_type'] is defined and dataplane['dp_type'] == "gateway"
+
+    - name: Push Standard Dataplane Manifest
+      ansible.builtin.template:
+        src: "templates/dataplane-nontransparent.yaml.j2"
+        dest: "/home/kuma/dataplane-nontransparent.yaml"
+        owner: kuma 
+        group: kuma 
+        mode: '0644'
+      vars:
+        service: "{{ dataplane['name'] }}"
+        inbound_port: "{{ dataplane['dp_manifest']['inbound']['port'] }}"
+        inbound_svc_port: "{{ dataplane['dp_manifest']['inbound']['svc_port'] }}"
+        inbound_kuma_service: "{{ dataplane['dp_manifest']['inbound']['tags']['kuma_service'] }}"
+      when: dataplane['dp_type'] is defined and dataplane['dp_type'] == "standard" 
+        
+    - name: Push Kuma DP Service to Host
+      ansible.builtin.template:
+        src: "templates/kuma-dp.service.j2"
+        dest: "/etc/systemd/system/kuma-dp.service"
+      vars:
+        zone_cp_hostname: "{{ dataplane['zone_addr'] }}"
+        service: "{{ dataplane['name'] }}"
+    
+    - name: Systemd Tasks
+      ansible.builtin.include_role: 
+        name: systemd
+      vars:
+       service: "{{ sysd_service }}"
+  become: true
+  when: dataplane['zone_type'] is defined and dataplane['zone_type'] == 'universal'

@@ -1,0 +1,15 @@
+---
+- name: "Pull the Image - {{ image_tag }}"
+  community.docker.docker_image:
+    name: "{{ image_tag }}"
+    source: pull
+    pull:
+      platform: amd64
+
+- name: "Start {{ container_name }} App"
+  community.docker.docker_container:
+    name: "{{ container_name }}"
+    image: "{{ image_tag }}"
+    state: started
+    ports:
+     - "8080:8080"

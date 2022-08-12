@@ -1,0 +1,11 @@
+type: Dataplane
+mesh: default
+name: {{ service }}
+networking: 
+  address: 127.0.0.1
+  inbound:
+    - port: {{ inbound_port }}
+      servicePort: {{ inbound_svc_port }}
+      tags: 
+        kuma.io/service: {{ inbound_kuma_service }}
+        kuma.io/protocol: http

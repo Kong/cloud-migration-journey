@@ -1,0 +1,24 @@
+---
+# tasks file for mesh-universal-cp
+
+- name: Install Global Control Plane
+  block:
+    - name: Copy Kuma-CP Service
+      ansible.builtin.copy:
+        src: "{{playbook_dir}}/files/{{ sysd_service }}"
+        dest: "/etc/systemd/system/{{ sysd_service }}"
+
+    - name: Copy Mesh License 
+      ansible.builtin.copy:
+        src: "{{ kmesh_license_path }}"
+        dest: /home/kuma/license.json
+        owner: kuma 
+        group: kuma 
+        mode: '0644'
+
+    - name: Systemd Tasks
+      ansible.builtin.include_role: 
+        name: systemd
+      vars: 
+        service: "{{ sysd_service }}"
+  become: true

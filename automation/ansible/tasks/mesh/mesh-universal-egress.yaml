@@ -1,0 +1,51 @@
+---
+- name: Set Egress Fact
+  ansible.builtin.set_fact:
+    egress: "{{ zone['egress'] }}"
+  when:  
+   - zone['egress']['install'] is defined and zone['egress']['install'] == True
+
+- name: Install Egress Dataplane
+  block:
+    - name: Create Ingress Tokens
+      ansible.builtin.include_tasks: 
+        file: tasks/mesh/gress-token.yaml
+      vars:
+        global_cp: "{{ global_cp_addr }}"
+        create_egress: "{{ egress['install'] }}"
+        zone_name: "{{ zone['name'] }}"
+
+    - name: "Put {{ token_type | upper }} Tokens on Filesystem"
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/tokens/{{ zone.name }}-{{ token_type }}.token"
+        dest: "/home/kuma/{{ token_type }}.token"
+        owner: kuma 
+        group: kuma
+        mode: '0644'
+    
+    - name: "Copy the {{ sysd_service }} Services"
+      ansible.builtin.template: 
+        src: "{{ playbook_dir }}/templates/{{ sysd_service }}.j2"
+        dest: "/etc/systemd/system/{{ sysd_service }}"
+      vars:
+        zone_cp_hostname: "{{ zone['zone_addr'] }}"
+            
+    - name: Copy Egress Dataplane Manifests 
+      ansible.builtin.template: 
+        src: "{{ playbook_dir }}/templates/dataplane-egress.yaml.j2"
+        dest: "/home/kuma/dataplane-egress.yaml"
+        owner: kuma 
+        group: kuma 
+        mode: '0644'
+      vars: 
+        dp_addr: "{{ egress['dp_addr'] }}"
+
+    - name: Systemd Tasks 
+      ansible.builtin.include_role: 
+        name: systemd
+      vars:
+        service: "{{ sysd_service }}"
+  become: true
+  when: 
+  - zone['type'] is defined and zone['type'] == 'universal'
+  - zone['egress']['install'] is defined and zone['egress']['install'] == True

@@ -1,0 +1,15 @@
+[Unit]
+Description = Kuma Zone Ingress
+After = network.target
+
+[Service]
+User=kuma
+ExecStart = /usr/bin/bash -c '/home/kuma/mesh/kong-mesh-1.8.1/bin/kuma-dp \
+    --log-output-path=/tmp/kuma-ingress.log run \
+    --cp-address=https://{{ zone_cp_hostname }}:5678 \
+    --dataplane-token-file=/home/kuma/ingress.token \
+    --dataplane-file=/home/kuma/dataplane-ingress.yaml \
+    --proxy-type ingress > /tmp/kuma-ingress.stdout 2> /tmp/kuma-ingress.stderr'
+
+[Install]
+WantedBy = multi-user.target

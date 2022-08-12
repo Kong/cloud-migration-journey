@@ -1,0 +1,36 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/kuma.yml
+  
+  tasks:
+  - name: Install K8s Based Zone CP/Ingress/Egress 
+    ansible.builtin.include_tasks: 
+      file: tasks/mesh/mesh-k8s.yaml
+    vars:
+      global_cp_addr: "{{ global_cp['addr'] }}"
+      kong_version: "{{ kong_mesh_version }}"
+      zone: "{{ item }}"
+    loop: "{{ zones | selectattr('type', 'eq', 'k8s') | list }}"
+  
+
+  - name: Install K8 Based Microservice
+    block: 
+      - name: Create Namespace
+        kubernetes.core.k8s:
+            state: present
+            definition:
+              apiVersion: v1
+              kind: Namespace
+              metadata:
+                name: microservice
+                labels:
+                  kuma.io/sidecar-injection: enabled
+  
+      - name: Run Deployment
+        kubernetes.core.k8s:
+          state: present
+          src: kuberentes/microservice.yaml
+          namespace: microservice
+          

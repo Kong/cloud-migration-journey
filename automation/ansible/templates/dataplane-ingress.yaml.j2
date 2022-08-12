@@ -1,0 +1,9 @@
+type: ZoneIngress
+name: universal-zone-ingress-{{ zone_name }}
+networking:
+  address: {{ dp_addr }}  #address that is routable within the zone
+  port: 10001
+  advertisedAddress: {{ dp_advertised_ip }}
+  advertisedPort: 10001
+  admin:
+    port: 30002

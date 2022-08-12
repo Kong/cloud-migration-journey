@@ -1,0 +1,58 @@
+---
+- name: Update all packages
+  ansible.builtin.yum:
+    name: '*'
+    state: latest
+    update_only: yes
+  become: true
+
+- name: Install Docker, Python3
+  ansible.builtin.yum:
+    name: "{{ item }}"
+    state: present
+  become: true
+  with_items:
+    - docker 
+    - python3
+
+- name: Start and Enable Docker 
+  ansible.builtin.systemd:
+    name: docker 
+    state: started
+    enabled: yes
+  become: true
+
+- name: Add ec2-user to docker group
+  ansible.builtin.user:
+    name: ec2-user
+    groups: docker
+    append: yes
+  become: true
+
+- name: check if virtualenv library already installed 
+  stat:
+    path: /usr/bin/virtualenv
+  register: pip_virtualenv_installed
+
+- name: Install Virtualenv module
+  ansible.builtin.pip:
+    name: virtualenv
+  when: pip_virtualenv_installed.stat.exists == False
+  become: true
+
+- name: Ensure virtual environment path exists
+  ansible.builtin.file:
+    mode: "0755"
+    owner: "ec2-user"
+    group: "ec2-user"
+    path: /opt/ansible_venv
+    state: "directory"
+  register: st_venv
+  become: true
+  
+- name: Create Python3 Virtual Env
+  ansible.builtin.pip:
+    name: docker
+    virtualenv: /opt/ansible_venv
+    virtualenv_python: python3
+    virtualenv_command: /usr/local/bin/virtualenv

@@ -1,0 +1,13 @@
+type: Dataplane
+mesh: default
+name: {{ service }}
+networking:
+  address: 127.0.0.1
+  gateway:
+    type: DELEGATED
+    tags:
+      kuma.io/service: kong
+  outbound:
+    - port: 33033
+      tags:
+        kuma.io/service: {{ outbound_kuma_service }}

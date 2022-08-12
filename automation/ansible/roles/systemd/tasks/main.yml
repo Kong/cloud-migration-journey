@@ -1,0 +1,23 @@
+---
+# tasks file for systemd
+- name: Systemd - Start, Enable, Validate Service
+  block:
+    - name: Enable and Start the Service
+      ansible.builtin.systemd:
+        name: "{{ service }}"
+        state: started
+        enabled: yes
+        daemon-reload: yes
+
+    - name: Get Running Services
+      ansible.builtin.service_facts:
+
+    - name: Print service facts
+      ansible.builtin.debug:
+        var: ansible_facts.services["{{ service }}"]
+
+    - name: Fail if Service State is not Running
+      ansible.builtin.fail:
+        msg: "Service - {{ service }} failed"
+      when: ansible_facts.services[service].state != "running" and ansible_facts.services[service].status != "enabled"
+  become: true

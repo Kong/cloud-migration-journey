@@ -1,0 +1,38 @@
+---
+- name: Install K8s Zone
+  block:
+    - debug: 
+        msg: "K8s Zone Attributes: {{ zone }}"
+
+    - name: Download Kong Mesh Charts
+      kubernetes.core.helm_repository:
+        name: kong-mesh
+        repo_url: "https://kong.github.io/kong-mesh-charts"
+
+    - name: Create Helm Values File
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/templates/helm/values-kong-mesh-zone.yaml.j2"
+        dest: "{{ playbook_dir }}/vars/helm/values-kong-mesh-zone-{{zone['name']}}.yaml"
+      vars: 
+        global_hostname: "{{ global_cp_addr }}"
+        zone_name: "{{ zone['name'] }}"
+        kong_version: "{{ kong_version }}"
+      
+    - name: Deploy Kong-Mesh Chart
+      kubernetes.core.helm:
+        name: "kong-mesh"
+        chart_ref: "kong-mesh/kong-mesh"
+        chart_version: "{{ kong_version }}"
+        release_namespace: "kong-mesh-system"
+        release_name: "kong-mesh"
+        release_state: present
+        values_files:
+          - "vars/helm/values-kong-mesh-zone-{{zone['name']}}.yaml"
+        create_namespace: true
+        kubeconfig: "{{ zone['kube_config'] }}"
+        context: "{{ zone['cluster_context'] }}"
+        wait: true
+      register: helm_command
+    
+
+  when: zone['type'] is defined and zone['type'] == 'k8s'

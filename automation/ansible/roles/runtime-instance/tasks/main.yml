@@ -1,0 +1,47 @@
+---
+# tasks file for runtime-instance
+
+- name: Create Runtime-Instance dir 
+  ansible.builtin.file:
+    path: runtime-instance
+    state: directory
+    mode: '0755'
+
+- name: Check if runtime instance is running
+  ansible.builtin.shell: |
+    docker ps  -f status=running | awk '{print $2}'
+  register: containers
+  retries: 5
+  delay: 10
+  until: containers.stderr | length == 0
+
+- ansible.builtin.debug:
+    var: containers
+
+- name: Instantiate Gateway Runtime Instance if not running
+  ansible.builtin.shell: |
+    /bin/bash <(curl -fsSL 'https://raw.githubusercontent.com/Kong/konnect-runtimes/pinned-cert/konnect-runtime-setup.sh') \
+    -api https://cloud.konghq.com \
+    -u '{{ konnect_username }}' \
+    -p '{{ konnect_password }}' \
+    -c '{{ konnect_controlPlane }}' \
+    -r 'kong' \
+    -ri 'kong-gateway:2.8.1.1'
+  args:
+    chdir: runtime-instance/
+    executable: /bin/bash
+  when: containers.stdout is not search("kong/kong-gateway") 
+
+- name: Last validation
+  ansible.builtin.shell: |
+    docker ps  -f status=running | awk '{print $2}' 
+  register: containers
+
+- name: Fail - Gateway Runtime Instance did not Start
+  ansible.builtin.fail: 
+    msg: Gateway Runtime Instance did not Start - please review
+  when: containers.stdout is not search("kong/kong-gateway")
+
+
+
+

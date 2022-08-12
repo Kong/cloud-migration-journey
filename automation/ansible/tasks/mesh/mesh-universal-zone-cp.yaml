@@ -1,0 +1,32 @@
+---
+# tasks file for mesh-zone-cp
+- debug:
+   msg: "Zone CP being installed : {{ zone }}"
+
+- name: Install Universal Zone
+  block:
+    - name: Copy Kuma-Zone-CP Service
+      ansible.builtin.template: 
+        src: "{{ playbook_dir }}/templates/{{ sysd_service }}.j2"
+        dest: "/etc/systemd/system/{{ sysd_service }}"
+      vars: 
+        zone_name: '{{ zone.name }}'
+        global_hostname: '{{ global_cp_addr }}'
+
+    - name: Copy Mesh License 
+      ansible.builtin.copy:
+        src: '{{ kmesh_license_path }}'
+        dest: /home/kuma/license.json
+        owner: kuma 
+        group: kuma 
+        mode: '0644'
+
+    - name: Systemd Tasks
+      ansible.builtin.include_role: 
+        name: systemd
+      vars:
+        service: "{{ sysd_service }}"
+  become: true
+  when: 
+    - zone['type'] is defined 
+    - zone['type'] == 'universal'

@@ -1,0 +1,105 @@
+kuma:
+  nameOverride: kong-mesh
+  # The default registry and tag to use for all Kuma images
+  global:
+    image:
+      registry: "docker.io/kong"
+      tag: "1.8.1"
+
+  controlPlane:
+    image:
+      repository: "kuma-cp"
+      pullPolicy: IfNotPresent
+
+    # -- Kuma CP log level: one of off,info,debug
+    logLevel: "info"
+
+    # -- Kuma CP modes: one of standalone,zone,global
+    mode: "zone"
+
+    # -- (string) Kuma CP zone, if running multizone
+    zone: "cloud"
+
+    # -- Only used in `zone` mode
+    kdsGlobalAddress: "grpcs://54.215.37.158:5685"
+
+    autoScaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 3
+
+    injectorFailurePolicy: "Ignore"
+
+    service:
+      # -- Service type of the Kuma Control Plane
+      type: ClusterIP
+
+    defaults:
+      # -- Whether or not to skip creating the default Mesh
+      skipMeshCreation: false
+
+    webhooks:
+      validator:
+        additionalRules: |
+          - apiGroups:
+              - kuma.io
+            apiVersions:
+              - v1alpha1
+            operations:
+              - CREATE
+              - UPDATE
+              - DELETE
+            resources:
+              - opapolicies
+      ownerReference:
+        additionalRules: |
+          - apiGroups:
+              - kuma.io
+            apiVersions:
+              - v1alpha1
+            operations:
+              - CREATE
+            resources:
+              - opapolicies
+  # Configuration for the kuma dataplane sidecar
+  dataPlane:
+    image:
+      repository: "kuma-dp"
+
+    # Configuration for the kuma init phase in the sidecar
+    initImage:
+      repository: "kuma-init"
+
+  ingress:
+    enabled: true
+    drainTime: 30s
+    replicas: 2
+    service:
+      type: LoadBalancer
+      port: 10001
+      annotations:
+        "service.beta.kubernetes.io/aws-load-balancer-scheme": "internal"
+        "service.beta.kubernetes.io/aws-load-balancer-type": "external"
+        "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type": "instance"    
+    nodeSelector:
+      kubernetes.io/os: linux
+      kubernetes.io/arch: amd64
+
+  egress:
+    # -- If true, it deploys Egress for cross cluster communication
+    enabled: true
+    # -- Time for which old listener will still be active as draining
+    drainTime: 30s
+    # -- Number of replicas of the Egress
+    replicas: 2
+    service:
+      # -- Service type of the Egress
+      type: ClusterIP
+      # -- (string) Optionally specify IP to be used by cloud provider when configuring load balancer
+      port: 10002
+      # -- Port on which service is exposed on Node for service of type NodePort
+    annotations: { }
+    # -- Node Selector for the Egress pods
+    nodeSelector:
+      kubernetes.io/os: linux
+      kubernetes.io/arch: amd64
