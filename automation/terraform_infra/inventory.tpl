@@ -23,7 +23,7 @@
 %{if node.tags["Name"] == "runtime-instance" }${node.public_ip}%{ endif }
 %{ endfor ~}
 
-[kuma-zone-ingress]
+[kuma-zone-egress]
 %{ for node in aws_nodes ~}
 %{if node.tags["Name"] == "runtime-instance" }${node.public_ip}%{ endif }
 %{ endfor ~}

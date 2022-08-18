@@ -5,7 +5,7 @@
   block:
     - name: Copy Kuma-CP Service
       ansible.builtin.copy:
-        src: "{{playbook_dir}}/files/{{ sysd_service }}"
+        src: "{{playbook_dir}}/templates/{{ sysd_service }}"
         dest: "/etc/systemd/system/{{ sysd_service }}"
 
     - name: Copy Mesh License 

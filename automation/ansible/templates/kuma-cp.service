@@ -1,0 +1,11 @@
+[Unit]
+Description = Kuma Global Control Plane
+After = network.target
+
+[Service]
+User=root
+ExecStart = /bin/bash -c 'KUMA_MODE=global \
+ /home/kuma/mesh/kong-mesh-1.8.1/bin/kuma-cp --log-output-path=/tmp/kuma-cp.log run --license-path=/home/kuma/license.json'
+
+[Install]
+WantedBy = multi-user.target

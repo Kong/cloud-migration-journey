@@ -1,13 +1,15 @@
 type: Dataplane
 mesh: default
-name: {{ service }}
+name: kong
 networking:
-  address: 127.0.0.1
+  address: {{ addr }}
   gateway:
     type: DELEGATED
     tags:
       kuma.io/service: kong
   outbound:
-    - port: 33033
-      tags:
-        kuma.io/service: {{ outbound_kuma_service }}
+{% for out in outbound %}
+    - port: {{ out.port }}
+      tags: 
+        kuma.io/service: {{ out.kuma_service }}
+{% endfor %}

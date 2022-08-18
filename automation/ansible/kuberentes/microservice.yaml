@@ -6,7 +6,7 @@ metadata:
   labels:
     app: microservice
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: microservice
@@ -20,6 +20,8 @@ spec:
         image: djfreese/disputes:latest
         ports:
         - containerPort: 8080
+          name: http-port
+          protocol: TCP
 --- 
 apiVersion: v1
 kind: Service
@@ -27,11 +29,12 @@ metadata:
   name: microservice
 spec:
   selector:
-    aapp: microservice
+    app: microservice
   type: ClusterIP
   ports:
-    - name: http
+    - name: http-port
       protocol: TCP
       appProtocol: http
       port: 8080
       targetPort: 8080
+

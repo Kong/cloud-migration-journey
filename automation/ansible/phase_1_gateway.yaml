@@ -1,7 +1,7 @@
 ---
 - hosts: all
   vars_files:
-    - vars/kuma.yml
+    - vars/kuma.yml.personal
 
   tasks:
   - name: Setup Docker and Python 3.6 VEnv
@@ -13,7 +13,6 @@
       name: runtime-instance
     vars:
       ansible_python_interpreter: /opt/ansible_venv/bin/python
-    tags: [ phase1 ]
     when: inventory_hostname in groups["gateway"]
   
   - name: Install Monolith
@@ -23,5 +22,4 @@
       container_name: monolith
       image_tag: "{{ monolith_image_tag }}"
       ansible_python_interpreter: /opt/ansible_venv/bin/python
-    tags: [ phase1 ]
     when: inventory_hostname in groups["monolith"]

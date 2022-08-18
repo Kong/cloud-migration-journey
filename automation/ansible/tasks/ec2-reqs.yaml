@@ -14,6 +14,7 @@
   with_items:
     - docker 
     - python3
+    - python-pip
 
 - name: Start and Enable Docker 
   ansible.builtin.systemd:
@@ -52,7 +53,9 @@
   
 - name: Create Python3 Virtual Env
   ansible.builtin.pip:
-    name: docker
+    name: 
+      - docker 
+      - cryptography
     virtualenv: /opt/ansible_venv
     virtualenv_python: python3
-    virtualenv_command: /usr/local/bin/virtualenv
+    virtualenv_command: /usr/bin/virtualenv

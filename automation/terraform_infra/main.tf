@@ -15,7 +15,6 @@ terraform {
   }
 }
 
-
 provider "aws" {
   region = var.aws_region
   default_tags {
@@ -32,14 +31,81 @@ locals {
   cluster_name = "kong-mesh-cloud"
 }
 
+module "vpc_eks" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "3.14.2"
+  cidr    = var.vpc_cidr
+  name    = "kong-mesh-migration-journey"
+  azs     = var.eks.az
 
-module "vpc" {
-  source = "./modules/vpc"
+  public_subnets  = var.eks.public_subnets
+  private_subnets = var.eks.private_subnets
 
-  vpc_cidr       = var.vpc_cidr
-  onprem_subnets = var.onprem_subnets
-  eks_subnets    = var.eks_subnets
+  create_igw           = true
+  enable_nat_gateway   = true
+  single_nat_gateway   = true
+  enable_dns_hostnames = true
+
+  public_subnet_tags = {
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                      = 1
+  }
+
+  private_subnet_tags = {
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/internal-elb"             = 1
+  }
 }
+
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "18.26.6"
+
+  cluster_name    = local.cluster_name
+  cluster_version = "1.22"
+
+  vpc_id     = module.vpc_eks.vpc_id
+  subnet_ids = module.vpc_eks.private_subnets
+
+  eks_managed_node_group_defaults = {
+    ami_type = "AL2_x86_64"
+
+    attach_cluster_primary_security_group = true
+    vpc_security_group_ids                = [aws_security_group.main.id]
+
+  }
+
+  node_security_group_tags = {
+    "kubernetes.io/cluster/${local.cluster_name}" = null
+  }
+  eks_managed_node_groups = {
+    one = {
+      name = "kong-mesh-node"
+
+      instance_types = ["t3.medium"]
+
+      min_size     = 2
+      max_size     = 2
+      desired_size = 2
+
+      pre_bootstrap_user_data = <<-EOT
+      echo 'foo bar'
+      EOT
+    }
+  }
+}
+
+module "on_prem_subnets" {
+  source = "./modules/addsubnet"
+
+  vpc_id         = module.vpc_eks.vpc_id
+  igw_id         = module.vpc_eks.igw_id
+  public_subnets = var.onprem_subnets
+  depends_on = [
+    module.vpc_eks
+  ]
+}
+
 
 resource "tls_private_key" "kong" {
   algorithm = "RSA"
@@ -49,7 +115,7 @@ resource "tls_private_key" "kong" {
 resource "aws_security_group" "main" {
   name        = "migration-journey"
   description = "Kong and Mesh Traffic Rules"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id      = module.vpc_eks.vpc_id
 
   ingress {
     description = "SSH"
@@ -74,7 +140,7 @@ resource "aws_security_group" "main" {
     ipv6_cidr_blocks = ["::/0"]
   }
   depends_on = [
-    module.vpc
+    module.vpc_eks
   ]
 }
 
@@ -115,7 +181,7 @@ resource "aws_instance" "node" {
   instance_type               = "t2.small"
   associate_public_ip_address = true
   key_name                    = aws_key_pair.key_pair.key_name
-  subnet_id                   = module.vpc.onprem_subnet_ids[0]
+  subnet_id                   = module.on_prem_subnets.public_subnets[0]
   vpc_security_group_ids      = [aws_security_group.main.id]
 
   root_block_device {
@@ -132,7 +198,7 @@ resource "aws_instance" "node" {
 
 resource "aws_db_subnet_group" "main" {
   name       = "kong-mesh-zone-cp-rds"
-  subnet_ids = module.vpc.onprem_subnet_ids
+  subnet_ids = module.on_prem_subnets.public_subnets
 
   tags = {
     Name = "kong-mesh-zone-cp-rds"
@@ -152,47 +218,6 @@ resource "aws_db_instance" "main" {
 }
 
 
-
-module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "18.26.6"
-
-  cluster_name    = local.cluster_name
-  cluster_version = "1.22"
-
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.eks_subnet_ids
-
-  eks_managed_node_group_defaults = {
-    ami_type = "AL2_x86_64"
-
-    attach_cluster_primary_security_group = true
-
-    # Disabling and using externally provided security groups
-    create_security_group = false
-  }
-
-  eks_managed_node_groups = {
-    one = {
-      name = "mj-cloud"
-
-      instance_types = ["t3.medium"]
-
-      min_size     = 2
-      max_size     = 2
-      desired_size = 2
-
-      pre_bootstrap_user_data = <<-EOT
-      echo 'foo bar'
-      EOT
-
-      vpc_security_group_ids = [
-        aws_security_group.main.id
-      ]
-    }
-  }
-}
-
 resource "local_file" "private_key" {
   content         = tls_private_key.kong.private_key_pem
   filename        = "ec2.key"
@@ -208,6 +233,16 @@ resource "local_file" "public_key" {
 resource "local_file" "inventory" {
   content  = templatefile("inventory.tpl", { aws_nodes = aws_instance.node, node_map = var.nodes })
   filename = "inventory"
+}
+
+#this needs to be tested
+resource "local_file" "kuma" {
+  content  = templatefile("kuma.tpl", { 
+    global_cp_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "kuma-global-cp")], 
+    zone_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "runtime-instance")],
+    gateway_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "runtime-instance")],
+    monolith_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "monolith")]})
+  filename = "kuma.yml"
 }
 
 output "cluster_id" {
@@ -233,8 +268,4 @@ output "region" {
 output "cluster_name" {
   description = "Kubernetes Cluster Name"
   value       = local.cluster_name
-}
-
-output "on_prem" {
-  value = module.vpc.onprem_subnet_ids
 }

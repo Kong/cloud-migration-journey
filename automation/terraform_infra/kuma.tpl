@@ -27,7 +27,7 @@ dataplanes:
     dp_manifest:
       outbound:
         tags: 
-          kuma_service: monolith-service_default_svc_5000
+          kuma_service: monolith-service_svc_5000
   - name: "monolith"
     dp_type: "standard"
     zone_type: "universal"
@@ -37,4 +37,4 @@ dataplanes:
         port: 5000
         svc_port: 8080
         tags:
-          kuma_service: monolith-service_default_svc_5000
+          kuma_service: monolith-service_svc_5000

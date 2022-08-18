@@ -3,7 +3,7 @@
   ansible.builtin.stat:
     path: '/home/kuma/{{ service_name }}-service.token'
   register: st_token
-  delegate_to: "{{ global_cp }}"
+  delegate_to: "{{ global_control_plane }}"
   become: true
 
 - name: Create Service Token 
@@ -11,7 +11,7 @@
   args: 
     chdir: /home/kuma/
   when: not st_token.stat.exists
-  delegate_to: "{{ global_cp }}"
+  delegate_to: "{{ global_control_plane }}"
   become: true
 
 - name: Fetch Service Token from Global CP to Bastion
@@ -19,5 +19,5 @@
     src: "/home/kuma/{{ service_name }}-service.token"
     dest: "{{ playbook_dir }}/tokens/{{ service_name }}-service.token"
     flat: yes
-  delegate_to: "{{ global_cp }}"
+  delegate_to: "{{ global_control_plane }}"
   become: true

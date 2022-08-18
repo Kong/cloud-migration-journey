@@ -7,41 +7,134 @@
     state: directory
     mode: '0755'
 
-- name: Check if runtime instance is running
-  ansible.builtin.shell: |
-    docker ps  -f status=running | awk '{print $2}'
-  register: containers
-  retries: 5
-  delay: 10
-  until: containers.stderr | length == 0
+- name: Create the Cluster Certificate
+  block:
+    - name: Create a Private Key
+      community.crypto.openssl_privatekey:
+        path: "{{ ri_path }}/cluster.key"
+        type: "RSA"
+        size: 4096
 
-- ansible.builtin.debug:
-    var: containers
+    - name: Create the CSR
+      community.crypto.openssl_csr: 
+        path: "{{ ri_path }}/cluster.csr"
+        privatekey_path: "{{ ri_path }}/cluster.key"
+        country_name: US
+        common_name: kongdp
 
-- name: Instantiate Gateway Runtime Instance if not running
+    - name: Generate a Self Signed OpenSSL certificate
+      community.crypto.x509_certificate:
+        path: "{{ ri_path }}/cluster.crt"
+        privatekey_path: "{{ ri_path }}/cluster.key"
+        csr_path: "{{ ri_path }}/cluster.csr"
+        provider: selfsigned
+      register: cert
+    
+    - name: Change Mode of Cert
+      ansible.builtin.file:
+        path: "{{ ri_path }}/{{ item }}"
+        mode: u=rw,g=r,o=r
+      with_items: 
+        - cluster.crt
+        - cluster.key
+    
+    - name: Get Base64 Cert 
+      ansible.builtin.shell: |
+        awk '{printf "%s\\n", $0}' runtime-instance/cluster.crt
+      register: cert 
+    
+    - name: Create Cert Var
+      ansible.builtin.set_fact:
+        cluster_crt: "{{ cert.stdout }}"
+    
+    - debug:
+        var: cluster_crt
+
+  vars:
+    ri_path: runtime-instance
+
+- name: Get Konnect Cluster Attributes
+  block:
+    - name: Authenticate to Konnect
+      ansible.builtin.uri:
+        url: "https://{{ base_url }}/kauth/api/v1/authenticate"
+        method: POST
+        body_format: json
+        body: '{ "username": "{{ konnect_username }}", "password":"{{ konnect_password }}" }'
+        return_content: yes
+      register: login
+
+    - name: login output response
+      debug: 
+        var: login
+
+    - name: GET Konnect Control Plane Data
+      ansible.builtin.uri:
+        url: "https://{{ base_url }}/api/runtime_groups/{{ konnect_controlPlane }}"
+        method: GET
+        return_content: yes
+        headers:
+          Cookie: "{{ login.cookies_string }}"
+      register: cp_content
+
+    - name: Control Plane Data
+      ansible.builtin.set_fact:
+        konnect_cp_id: "{{ cp_content.json['id'] }}"
+        konnect_cp_name: "{{ cp_content.json['name']}}"
+        konnect_cp_endpoint: "{{ cp_content.json['config']['cp_outlet'] | regex_replace('https://') | regex_replace('/') }}"
+        konnect_tp_endpoint: "{{cp_content.json['config']['telemetry_endpoint'] | regex_replace('https://') | regex_replace('/') }}"
+
+    - debug: 
+        msg: '{ "name": "{{ konnect_cp_name }}", "id" :"{{konnect_cp_id}}", "certificates": ["{{cluster_crt}}"] }'
+
+    - name: PUT Control Plane Cert to Konnect
+      ansible.builtin.uri:
+        url: "https://{{ base_url }}/api/runtime_groups/{{ konnect_controlPlane }}"
+        method: PUT
+        body_format: json
+        body: '{ "name": "{{ konnect_cp_name }}", "id" :"{{konnect_cp_id}}", "certificates": ["{{cluster_crt}}"] }'
+        headers:
+          Cookie: "{{ login.cookies_string }}"
+      register: cert_request
+    
+    - name: output cert_request
+      debug:
+        var: cert_request
+
+  vars:
+    base_url: "cloud.konghq.com"
+
+- name: Check if Kong Container is Running
+  community.docker.docker_container_info: 
+    name: kong-dp
+  register: kong_dp
+
+- name: Delete Kong DP container 
   ansible.builtin.shell: |
-    /bin/bash <(curl -fsSL 'https://raw.githubusercontent.com/Kong/konnect-runtimes/pinned-cert/konnect-runtime-setup.sh') \
-    -api https://cloud.konghq.com \
-    -u '{{ konnect_username }}' \
-    -p '{{ konnect_password }}' \
-    -c '{{ konnect_controlPlane }}' \
-    -r 'kong' \
-    -ri 'kong-gateway:2.8.1.1'
+    docker kill kong-dp 
+    docker rm kong-dp 
+  when: kong_dp.exists 
+
+- name: Run Kong DP Container
+  ansible.builtin.shell: |
+      docker run -d --name kong-dp --network host \
+        -e "KONG_ROLE=data_plane" \
+        -e "KONG_DATABASE=off" \
+        -e "KONG_CLUSTER_MTLS=pki" \
+        -e "KONG_CLUSTER_CONTROL_PLANE={{ konnect_cp_endpoint }}:443" \
+        -e "KONG_CLUSTER_SERVER_NAME={{ konnect_cp_endpoint }}" \
+        -e "KONG_CLUSTER_TELEMETRY_ENDPOINT={{ konnect_tp_endpoint }}:443" \
+        -e "KONG_CLUSTER_TELEMETRY_SERVER_NAME={{ konnect_tp_endpoint }}" \
+        -e "KONG_CLUSTER_CERT=/config/cluster.crt" \
+        -e "KONG_CLUSTER_CERT_KEY=/config/cluster.key" \
+        -e "KONG_LUA_SSL_TRUSTED_CERTIFICATE=system" \
+        --mount type=bind,source="$(pwd)",target=/config,readonly \
+        -p 8000:8000 \
+        kong/kong-gateway:2.8.1.2
   args:
-    chdir: runtime-instance/
-    executable: /bin/bash
-  when: containers.stdout is not search("kong/kong-gateway") 
-
-- name: Last validation
-  ansible.builtin.shell: |
-    docker ps  -f status=running | awk '{print $2}' 
-  register: containers
-
-- name: Fail - Gateway Runtime Instance did not Start
-  ansible.builtin.fail: 
-    msg: Gateway Runtime Instance did not Start - please review
-  when: containers.stdout is not search("kong/kong-gateway")
-
+    chdir: "{{ ri_path }}"
+  vars: 
+    ri_path: runtime-instance
 
 
 

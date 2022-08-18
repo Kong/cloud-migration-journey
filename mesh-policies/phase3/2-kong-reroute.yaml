@@ -1,0 +1,18 @@
+type: TrafficRoute
+name: kong-reroute
+mesh: default
+sources:
+  - match:
+      kuma.io/service: kong
+destinations:
+  - match:
+      kuma.io/service: monolith-service_svc_5000
+conf:
+  http:
+    - match:
+        path:
+          prefix: "/monolith/resources/card/dispute"
+      destination:
+        kuma.io/service: microservice_microservice_svc_8080
+  destination:
+    kuma.io/service: monolith-service_svc_5000

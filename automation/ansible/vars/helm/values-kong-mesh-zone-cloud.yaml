@@ -21,7 +21,7 @@ kuma:
     zone: "cloud"
 
     # -- Only used in `zone` mode
-    kdsGlobalAddress: "grpcs://54.215.37.158:5685"
+    kdsGlobalAddress: "grpcs://52.10.230.78:5685"
 
     autoScaling:
       enabled: true
@@ -76,11 +76,7 @@ kuma:
     replicas: 2
     service:
       type: LoadBalancer
-      port: 10001
-      annotations:
-        "service.beta.kubernetes.io/aws-load-balancer-scheme": "internal"
-        "service.beta.kubernetes.io/aws-load-balancer-type": "external"
-        "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type": "instance"    
+      port: 10001   
     nodeSelector:
       kubernetes.io/os: linux
       kubernetes.io/arch: amd64

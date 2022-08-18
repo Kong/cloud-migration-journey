@@ -76,11 +76,7 @@ kuma:
     replicas: 2
     service:
       type: LoadBalancer
-      port: 10001
-      annotations:
-        "service.beta.kubernetes.io/aws-load-balancer-scheme": "internal"
-        "service.beta.kubernetes.io/aws-load-balancer-type": "external"
-        "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type": "instance"    
+      port: 10001   
     nodeSelector:
       kubernetes.io/os: linux
       kubernetes.io/arch: amd64

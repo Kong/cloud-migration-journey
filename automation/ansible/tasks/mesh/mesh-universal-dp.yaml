@@ -8,7 +8,7 @@
       ansible.builtin.include_tasks: 
         file: "tasks/mesh/dataplane-token.yaml"
       vars:
-        global_cp: "{{ global_cp_addr }}"
+        global_control_plane: "{{ global_cp_addr }}"
         service_name: "{{ dataplane['name'] }}"
 
     - name: Put Token on Host
@@ -27,8 +27,9 @@
         group: kuma 
         mode: '0644'
       vars:
+        addr: "{{ dataplane['dp_manifest']['networking']['addr'] }}"
         service: "{{ dataplane['name'] }}"
-        outbound_kuma_service: "{{ dataplane['dp_manifest']['outbound']['tags']['kuma_service'] }}"
+        outbound: "{{ dataplane['dp_manifest']['outbound'] }}"
       when: dataplane['dp_type'] is defined and dataplane['dp_type'] == "gateway"
 
     - name: Push Standard Dataplane Manifest
@@ -39,6 +40,7 @@
         group: kuma 
         mode: '0644'
       vars:
+        addr: "{{ dataplane['dp_manifest']['networking']['addr'] }}"
         service: "{{ dataplane['name'] }}"
         inbound_port: "{{ dataplane['dp_manifest']['inbound']['port'] }}"
         inbound_svc_port: "{{ dataplane['dp_manifest']['inbound']['svc_port'] }}"

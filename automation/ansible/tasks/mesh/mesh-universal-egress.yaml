@@ -11,7 +11,7 @@
       ansible.builtin.include_tasks: 
         file: tasks/mesh/gress-token.yaml
       vars:
-        global_cp: "{{ global_cp_addr }}"
+        global_control_plane: "{{ global_cp_addr }}"
         create_egress: "{{ egress['install'] }}"
         zone_name: "{{ zone['name'] }}"
 

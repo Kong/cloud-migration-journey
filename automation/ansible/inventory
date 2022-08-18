@@ -4,18 +4,16 @@ ansible_user="ec2-user"
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 
 [gateway]
-54.193.67.206 service_name="gateway"
+54.200.159.13 service_name="gateway"
 [monolith]
-54.153.46.252 service_name="monolith" monolith_image_tag="djfreese/monolith:latest"
-
+18.236.180.203 service_name="monolith" monolith_image_tag="djfreese/monolith:latest"
 [kuma-global-cp]
-54.215.37.158
-
+52.10.230.78
 [kuma-zone-cp]
-54.193.67.206
+54.200.159.13
 
 [kuma-zone-ingress]
-54.193.67.206 
+54.200.159.13
 
 [kuma-zone-egress]
-54.193.67.206 
+54.200.159.13
