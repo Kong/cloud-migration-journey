@@ -12,6 +12,6 @@ RUN --mount=type=cache,target=/tmp/kmj/.terraform \
 COPY ./automation/terraform_infra/ /kmj
 
 # copy terraform cache into place, cleanup temp cache in image and re-run init to ensure we have everything
-RUN cp -R /tmp/kmj/.terraform /kmj/.terraform && ls -lh /kmj/.terraform && rm -rf /tmp/kmj && cd /kmj && terraform init
+RUN cp -R /tmp/kmj/.terraform /kmj/.terraform && rm -rf /tmp/kmj && cd /kmj && terraform init
 
 WORKDIR /kmj
