@@ -1,4 +1,4 @@
-FROM python:alpine as build
+FROM python:3.10-alpine as build
 
 ENV PYTHONPATH=/usr/local/lib/python3.10/site-packages:/root/ansible/pip/usr/local/lib/python3.10/site-packages
 ENV PATH=/root/ansible/pip/usr/local/bin:$PATH
@@ -22,7 +22,7 @@ RUN wget https://get.helm.sh/helm-${HELM_VER}-linux-amd64.tar.gz \
     chmod +x /bin/helm
 
 # Create final product
-FROM python:alpine
+FROM python:3.10-alpine
 
 ENV PYTHONPATH=/usr/local/lib/python3.10/site-packages:/root/ansible/pip/usr/local/lib/python3.10/site-packages
 ENV PATH=/root/ansible/pip/usr/local/bin:$PATH
