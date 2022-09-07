@@ -9,11 +9,10 @@ DEFAULT_TAG ?= latest
 RELEASE_TAG ?= `git rev-parse --short HEAD`
 
 # AWS
-AWS_CREDS_PATH = $(HOME)/.aws/credentials
-AWS_CONFIG_PATH = $(HOME)/.aws/config
+AWS_CREDS_PATH ?= $(HOME)/.aws/credentials
 
-# Docker
-DOCKER_MOUNTS = ""
+# Terraform
+TF_VARS ?= user.tfvars
 
 #!! target: description
 #!! ===================: ====================================================================================
@@ -29,11 +28,18 @@ help:
 build:
 	@echo "Creating local configuration in $(HOME)/.$(CONFIG_NAME)..."
 	@mkdir -p $(HOME)/.$(CONFIG_NAME)/{ansible,tf,logs}
-	@echo "Removing old Kong Migration Journey container builds if they exist..."
+	@if [ ! -f $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS) ]; then \
+		echo "Copying default terraform customization variables to $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)..."; \
+		cp ./automation/configs/user.tfvars $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS); \
+	else \
+		echo "Default terraform customization variables exist, not copying..."; \
+	fi
+	@echo "Removing old Kong Migration Journey containers if they exist..."
 	@- docker rmi `docker images $(IMAGE_BASE_NAME)-tf --format='{{.ID}}'` -f > /dev/null 2>&1
 	@echo "Building Kong Migration Journey containers..."
 	@docker build ./automation/ -t $(IMAGE_BASE_NAME)-tf:$(RELEASE_TAG) -t $(IMAGE_BASE_NAME)-tf:$(DEFAULT_TAG) -f ./automation/Dockerfile.terraform
 	@echo "Done!"
+	@echo "To customize your demo infrastructure, edit $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)"
 
 
 #!! infra.prep: Prepare to build your Kong Migration Journey demonstration infrastructure
@@ -41,6 +47,13 @@ infra.prep:
 	@echo "Let's make sure your AWS CLI is configured, press return to avoid making changes to existing configurations..."
 	@aws configure
 	@echo "Planning your Kong Migration Journey demonstration infrastructure deployment..."
-	@docker run --rm -v $(HOME)/.$(CONFIG_NAME):/kmj/out -v $(AWS_CREDS_PATH):/root/.aws/credentials -v $(AWS_CONFIG_PATH):/root/.aws/config --name=$(IMAGE_BASE_NAME)-tf  $(IMAGE_BASE_NAME)-tf:latest plan -out /kmj/out/tf/plan.out > $(HOME)/.$(CONFIG_NAME)/logs/infra.prep.log 2>&1
+	@docker run \
+		--rm \
+		-v $(HOME)/.$(CONFIG_NAME):/kmj/out \
+		-v $(AWS_CREDS_PATH):/root/.aws/credentials \
+		-v $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS):/root/$(TF_VARS):ro \
+		--name=$(IMAGE_BASE_NAME)-tf \
+		$(IMAGE_BASE_NAME)-tf:latest \
+		plan -var-file="/root/$(TF_VARS)" -out /kmj/out/tf/plan.out > $(HOME)/.$(CONFIG_NAME)/logs/infra.prep.log 2>&1
 	@echo "Done!"
 	@echo "Review the logs at $(HOME)/.$(CONFIG_NAME)/logs/infra.prep.log"
