@@ -36,8 +36,12 @@ build:
 	fi
 	@echo "Removing old Kong Migration Journey containers if they exist..."
 	@- docker rmi `docker images $(IMAGE_BASE_NAME)-tf --format='{{.ID}}'` -f > /dev/null 2>&1
+	@- docker rmi `docker images $(IMAGE_BASE_NAME)-ansible --format='{{.ID}}'` -f > /dev/null 2>&1
 	@echo "Building Kong Migration Journey containers..."
+	@echo "Terraform build..."
 	@docker build ./automation/ -t $(IMAGE_BASE_NAME)-tf:$(RELEASE_TAG) -t $(IMAGE_BASE_NAME)-tf:$(DEFAULT_TAG) -f ./automation/Dockerfile.terraform
+	@echo "Ansible build..."
+	@docker build ./automation -t $(IMAGE_BASE_NAME)-ansible:$(RELEASE_TAG) -t $(IMAGE_BASE_NAME)-ansible:$(DEFAULT_TAG) -f ./automation/Dockerfile.ansible
 	@echo "Done!"
 	@echo "To customize your demo infrastructure, edit $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)"
 

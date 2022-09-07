@@ -1,0 +1,36 @@
+FROM python:alpine as build
+
+ENV PYTHONPATH=/usr/local/lib/python3.10/site-packages:/root/ansible/pip/usr/local/lib/python3.10/site-packages
+ENV PATH=/root/ansible/pip/usr/local/bin:$PATH
+ENV HELM_VER=v3.9.4
+
+COPY ./ansible /kmj
+
+# install python deps
+RUN pip3 install --root /root/ansible/pip -r /kmj/requirements.txt
+
+# install ansible collection deps
+RUN mkdir /kmj/collections && \
+    ansible-galaxy collection install -r /kmj/requirements.yaml -p /kmj/collections/
+
+# install binary deps
+RUN wget https://get.helm.sh/helm-${HELM_VER}-linux-amd64.tar.gz \
+    -O /tmp/helm.tar.gz && \
+    tar -xvzf /tmp/helm.tar.gz \
+    -C /tmp && \
+    mv /tmp/linux-amd64/helm /bin && \
+    chmod +x /bin/helm
+
+# Create final product
+FROM python:alpine
+
+ENV PYTHONPATH=/usr/local/lib/python3.10/site-packages:/root/ansible/pip/usr/local/lib/python3.10/site-packages
+ENV PATH=/root/ansible/pip/usr/local/bin:$PATH
+
+COPY --from=build /root/ansible /root/ansible
+
+COPY --from=build /bin/helm /bin/helm
+
+COPY --from=build /kmj /kmj
+
+ENTRYPOINT [ "ansible-playbook" ]
