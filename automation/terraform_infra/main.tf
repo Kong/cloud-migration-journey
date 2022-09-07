@@ -19,7 +19,7 @@ provider "aws" {
   region = var.aws_region
   default_tags {
     tags = {
-      Project = "migration-journey"
+      Project = "kong-migration-journey"
     }
   }
 }
@@ -230,20 +230,24 @@ resource "local_file" "public_key" {
   file_permission = "0600"
 }
 
+# resource "local_file" "inventory" {
+#   content  = templatefile("inventory.tpl", { aws_nodes = aws_instance.node, node_map = var.nodes })
+#   filename = "inventory"
+# }
 resource "local_file" "inventory" {
-  content  = templatefile("inventory.tpl", { aws_nodes = aws_instance.node, node_map = var.nodes })
-  filename = "inventory"
+  content  = templatefile("inventory.yaml.tpl", { aws_nodes = aws_instance.node, node_map = var.nodes })
+  filename = "out/ansible/inventory.yaml"
 }
 
 #this needs to be tested
-resource "local_file" "kuma" {
-  content  = templatefile("kuma.tpl", { 
-    global_cp_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "kuma-global-cp")], 
-    zone_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "runtime-instance")],
-    gateway_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "runtime-instance")],
-    monolith_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "monolith")]})
-  filename = "kuma.yml"
-}
+# resource "local_file" "kuma" {
+#  content  = templatefile("kuma.tpl", { 
+#    global_cp_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "kuma-global-cp")], 
+#    zone_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "runtime-instance")],
+#    gateway_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "runtime-instance")],
+#    monolith_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "monolith")]})
+#  filename = "kuma.yml"
+#}
 
 output "cluster_id" {
   description = "EKS cluster ID"
