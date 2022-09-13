@@ -53,3 +53,9 @@ variable "eks" {
     az              = ["us-west-2a", "us-west-2b"]
   }
 }
+
+variable "me" {
+  type        = string
+  description = "auto personalization of kong migration journey demo environment"
+  default     = ""
+}
