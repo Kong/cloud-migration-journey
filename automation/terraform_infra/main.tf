@@ -37,7 +37,7 @@ apiVersion: v1
 clusters:
 - cluster:
     server: ${module.eks.cluster_endpoint}
-    certificate-authority-data: ${module.eks.certificate_authority.0.data}
+    certificate-authority-data: ${module.eks.cluster_certificate_authority_data}
   name: kubernetes
 contexts:
 - context:
@@ -56,7 +56,7 @@ users:
       args:
         - "token"
         - "-i"
-        - "${local.cluster-name}"
+        - "${local.cluster_name}"
 KUBECONFIG
 }
 
