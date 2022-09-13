@@ -13,13 +13,16 @@ RUN pip3 install --root /root/ansible/pip -r /kmj/requirements.txt
 RUN mkdir /kmj/collections && \
     ansible-galaxy collection install -r /kmj/requirements.yaml -p /kmj/collections/
 
-# install binary deps
+# install binary deps: helm, aws-iam-authenticator
 RUN wget https://get.helm.sh/helm-${HELM_VER}-linux-amd64.tar.gz \
-    -O /tmp/helm.tar.gz && \
+        -O /tmp/helm.tar.gz && \
     tar -xvzf /tmp/helm.tar.gz \
-    -C /tmp && \
+        -C /tmp && \
     mv /tmp/linux-amd64/helm /bin && \
-    chmod +x /bin/helm
+    chmod +x /bin/helm;
+    wget  https://s3.us-west-2.amazonaws.com/amazon-eks/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator \
+        -O /bin/aws-iam-authenticator && \
+    chmod +x /bin/aws-iam-authenticator;
 
 # Create final product
 FROM python:3.10-alpine
