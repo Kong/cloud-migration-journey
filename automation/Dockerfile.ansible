@@ -34,6 +34,8 @@ COPY --from=build /root/ansible /root/ansible
 
 COPY --from=build /bin/helm /bin/helm
 
+COPY --from=build /bin/aws-iam-authenticator /bin/aws-iam-authenticator
+
 COPY --from=build /kmj /kmj
 
 ENTRYPOINT [ "ansible-playbook" ]
