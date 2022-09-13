@@ -52,7 +52,7 @@ prep:
 		echo "Default terraform customization variables exist, not copying..."; \
 	fi
 	@printf "\n\n"
-	@printf "To customize your demo infrastructure, such as AWS region and availability zones, edit:\n$(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)\nDone!"
+	@printf "To customize your demo infrastructure, such as AWS region and availability zones, edit:\n$(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)\nDone!\n"
 
 
 #!! infra.deploy: Deploys your Kong Migration Journey demo infrastructure.
@@ -74,7 +74,7 @@ infra.deploy:
 			-auto-approve \
 			> $(HOME)/.$(CONFIG_NAME)/logs/infra.deploy.log 2>&1; \
 		if [ $$? -ne 0 ]; then echo "Error with deployment. See logs for details!"; else echo "Done!";fi
-	@printf "\n\nReview the logs at:\n$(HOME)/.$(CONFIG_NAME)/logs/infra.deploy.log"
+	@printf "\n\nReview the logs at:\n$(HOME)/.$(CONFIG_NAME)/logs/infra.deploy.log\n"
 
 
 #!! infra.destroy: Destroys all of your Kong Migration Journey demo infrastructure.
@@ -100,4 +100,4 @@ infra.destroy:
 	@echo "Removing ansible inventory file: $(HOME)/.$(CONFIG_NAME)/ansible/inventory.yml..."
 	@rm -f $(HOME)/.$(CONFIG_NAME)/ansible/inventory.yml
 	@echo "Done!"
-	@printf "\n\nReview the logs at:\n$(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log"
+	@printf "\n\nReview the logs at:\n$(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log\n"
