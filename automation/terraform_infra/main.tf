@@ -55,6 +55,8 @@ users:
       command: aws-iam-authenticator
       args:
         - "token"
+        - "--region"
+        - "${var.aws_region}"
         - "-i"
         - "${local.cluster_name}"
 KUBECONFIG
