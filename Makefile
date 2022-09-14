@@ -14,17 +14,32 @@ AWS_CREDS_PATH ?= $(HOME)/.aws/credentials
 # Terraform
 TF_VARS ?= user.tfvars
 
+
+# Help Outputs
+# base64 encoded due to shell char issues for output
+TITLE = "IDrilojilojilZcgIOKWiOKWiOKVlyDilojilojilojilojilojilojilZcg4paI4paI4paI4pWXICAg4paI4paI4pWXIOKWiOKWiOKWiOKWiOKWiOKWiOKVlwogOuKWiOKWiOKVkSDilojilojilZTilZ3ilojilojilZTilZDilZDilZDilojilojilZfilojilojilojilojilZcgIOKWiOKWiOKVkeKWiOKWiOKVlOKVkOKVkOKVkOKVkOKVnQogOuKWiOKWiOKWiOKWiOKWiOKVlOKVnSDilojilojilZEgICDilojilojilZHilojilojilZTilojilojilZcg4paI4paI4pWR4paI4paI4pWRICDilojilojilojilZcKIDrilojilojilZTilZDilojilojilZcg4paI4paI4pWRICAg4paI4paI4pWR4paI4paI4pWR4pWa4paI4paI4pWX4paI4paI4pWR4paI4paI4pWRICAg4paI4paI4pWRCiA64paI4paI4pWRICDilojilojilZfilZrilojilojilojilojilojilojilZTilZ3ilojilojilZEg4pWa4paI4paI4paI4paI4pWR4pWa4paI4paI4paI4paI4paI4paI4pWU4pWdCiA64pWa4pWQ4pWdICDilZrilZDilZ0g4pWa4pWQ4pWQ4pWQ4pWQ4pWQ4pWdIOKVmuKVkOKVnSAg4pWa4pWQ4pWQ4pWQ4pWdIOKVmuKVkOKVkOKVkOKVkOKVkOKVnSAK"
+SUBTITLE = "ICAgX18gIF9fIF8gICAgICAgICAgICAgICAgIF8gICBfICAgICAgICAgICAgIDogICAgICAgXyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgfCAgXC8gIChfKSAgICAgICAgICAgICAgIHwgfCAoXykgICAgICAgICAgICA6ICAgICAgfCB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogIHwgXCAgLyB8XyAgX18gXyBfIF9fIF9fIF98IHxfIF8gIF9fXyAgXyBfXyAgOiAgICAgIHwgfCBfX18gIF8gICBfIF8gX18gXyBfXyAgIF9fXyBfICAgXyAKICB8IHxcL3wgfCB8LyBfYCB8ICdfXy8gX2AgfCBfX3wgfC8gXyBcfCAnXyBcIDogIF8gICB8IHwvIF8gXHwgfCB8IHwgJ19ffCAnXyBcIC8gXyBcIHwgfCB8CiAgfCB8ICB8IHwgfCAoX3wgfCB8IHwgKF98IHwgfF98IHwgKF8pIHwgfCB8IHw6IHwgfF9ffCB8IChfKSB8IHxffCB8IHwgIHwgfCB8IHwgIF9fLyB8X3wgfAogIHxffCAgfF98X3xcX18sIHxffCAgXF9fLF98XF9ffF98XF9fXy98X3wgfF98OiAgXF9fX18vIFxfX18vIFxfXyxffF98ICB8X3wgfF98XF9fX3xcX18sIHwKICAgICAgICAgICAgIF9fLyB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgIDogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF9fLyB8CiAgICAgICAgICAgIHxfX18vICAgICAgICAgICAgICAgICAgICAgICAgICAgICA6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHxfX18vIAo="
+
+
+
+
+
+
+
 #!! target: description
-#!! ===================: ====================================================================================
+#!! ===================: ======================================================================================
 #!! help: Lists the available make targets.  Run a make target by running 'make <target name>'
 help:
 	@clear
-	@printf '\e[1;32m%-6s\e[m' " Kong Migration Journey:"
 	@printf "\n\n"
-	@grep -E '(\#!!\s{1}.*\:\s{1})(.*$$)' $(MAKEFILE_LIST) | tr -d '#!!' | awk 'BEGIN {FS = ":"}; {printf "\033[36m%-20s\033[35m %s\n", $$1, $$2}'
+	@echo "$(TITLE)" | base64 -d | awk 'BEGIN {FS = ":"}; {printf "\033[36m%-35s\033[1;37m %s\n", $$1, $$2}'
+	@echo "$(SUBTITLE)" | base64 -d | awk 'BEGIN {FS = ":"}; {printf "        \033[0;32m%-0s\033[35m%s\n", $$1, $$2}'
+	@printf "\n"
+	@grep -E '(\#!!\s{1}.*\:\s{1})(.*$$)' $(MAKEFILE_LIST) | tr -d '#!!' | awk 'BEGIN {FS = ":"}; {printf "\033[36m%-20s\033[35m%s\n", $$1, $$2}'
+	@printf "\n\n"
 
 
-#!! build: Build and prepare Kong Migration Journey utility containers for demo based off of local repository clone
+#!! build: Build and prepare utility containers for demo based off of local repository clone
 build:
 	@clear
 	@echo "Removing old Kong Migration Journey utility containers if they exist..."
@@ -99,5 +114,11 @@ infra.destroy:
 	@rm -f $(HOME)/.$(CONFIG_NAME)/tf/terraform.tfstate
 	@echo "Removing ansible inventory file: $(HOME)/.$(CONFIG_NAME)/ansible/inventory.yml..."
 	@rm -f $(HOME)/.$(CONFIG_NAME)/ansible/inventory.yml
+	@echo "Removing ec2 key file: $(HOME)/.$(CONFIG_NAME)/ec2/ec2.key..."
+	@rm -f $(HOME)/.$(CONFIG_NAME)/ec2/ec2.key
+	@echo "Removing ec2 public key file: $(HOME)/.$(CONFIG_NAME)/ec2/ec2.pub..."
+	@rm -f $(HOME)/.$(CONFIG_NAME)/ec2/ec2.pub
+	@echo "Removing EKS cluster kubeconfig file: $(HOME)/.$(CONFIG_NAME)/kube/kubeconfig..."
+	@rm -f $(HOME)/.$(CONFIG_NAME)/kube/kubeconfig
 	@echo "Done!"
 	@printf "\n\nReview the logs at:\n$(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log\n"
