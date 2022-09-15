@@ -1,3 +1,5 @@
+# Kong Migration Journey configuration file
+
 # Kong Konnect Settings
 konnect_instance_id = ""
 konnect_user        = ""
