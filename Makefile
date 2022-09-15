@@ -110,15 +110,5 @@ infra.destroy:
 			-var "me=$$ME" \
 			-auto-approve \
 			> $(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log 2>&1;
-	@echo "Removing terraform state file: $(HOME)/.$(CONFIG_NAME)/tf/terraform.state..."
-	@rm -f $(HOME)/.$(CONFIG_NAME)/tf/terraform.tfstate
-	@echo "Removing ansible inventory file: $(HOME)/.$(CONFIG_NAME)/ansible/inventory.yml..."
-	@rm -f $(HOME)/.$(CONFIG_NAME)/ansible/inventory.yml
-	@echo "Removing ec2 key file: $(HOME)/.$(CONFIG_NAME)/ec2/ec2.key..."
-	@rm -f $(HOME)/.$(CONFIG_NAME)/ec2/ec2.key
-	@echo "Removing ec2 public key file: $(HOME)/.$(CONFIG_NAME)/ec2/ec2.pub..."
-	@rm -f $(HOME)/.$(CONFIG_NAME)/ec2/ec2.pub
-	@echo "Removing EKS cluster kubeconfig file: $(HOME)/.$(CONFIG_NAME)/kube/kubeconfig..."
-	@rm -f $(HOME)/.$(CONFIG_NAME)/kube/kubeconfig
 	@echo "Done!"
 	@printf "\n\nReview the logs at:\n$(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log\n"
