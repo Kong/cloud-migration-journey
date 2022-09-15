@@ -16,14 +16,9 @@ TF_VARS ?= user.tfvars
 
 
 # Help Outputs
-# base64 encoded due to shell char issues for output
+# base64 encoded due to shell char issues for help menu output
 TITLE = "IDrilojilojilZcgIOKWiOKWiOKVlyDilojilojilojilojilojilojilZcg4paI4paI4paI4pWXICAg4paI4paI4pWXIOKWiOKWiOKWiOKWiOKWiOKWiOKVlwogOuKWiOKWiOKVkSDilojilojilZTilZ3ilojilojilZTilZDilZDilZDilojilojilZfilojilojilojilojilZcgIOKWiOKWiOKVkeKWiOKWiOKVlOKVkOKVkOKVkOKVkOKVnQogOuKWiOKWiOKWiOKWiOKWiOKVlOKVnSDilojilojilZEgICDilojilojilZHilojilojilZTilojilojilZcg4paI4paI4pWR4paI4paI4pWRICDilojilojilojilZcKIDrilojilojilZTilZDilojilojilZcg4paI4paI4pWRICAg4paI4paI4pWR4paI4paI4pWR4pWa4paI4paI4pWX4paI4paI4pWR4paI4paI4pWRICAg4paI4paI4pWRCiA64paI4paI4pWRICDilojilojilZfilZrilojilojilojilojilojilojilZTilZ3ilojilojilZEg4pWa4paI4paI4paI4paI4pWR4pWa4paI4paI4paI4paI4paI4paI4pWU4pWdCiA64pWa4pWQ4pWdICDilZrilZDilZ0g4pWa4pWQ4pWQ4pWQ4pWQ4pWQ4pWdIOKVmuKVkOKVnSAg4pWa4pWQ4pWQ4pWQ4pWdIOKVmuKVkOKVkOKVkOKVkOKVkOKVnSAK"
 SUBTITLE = "ICAgX18gIF9fIF8gICAgICAgICAgICAgICAgIF8gICBfICAgICAgICAgICAgIDogICAgICAgXyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgfCAgXC8gIChfKSAgICAgICAgICAgICAgIHwgfCAoXykgICAgICAgICAgICA6ICAgICAgfCB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogIHwgXCAgLyB8XyAgX18gXyBfIF9fIF9fIF98IHxfIF8gIF9fXyAgXyBfXyAgOiAgICAgIHwgfCBfX18gIF8gICBfIF8gX18gXyBfXyAgIF9fXyBfICAgXyAKICB8IHxcL3wgfCB8LyBfYCB8ICdfXy8gX2AgfCBfX3wgfC8gXyBcfCAnXyBcIDogIF8gICB8IHwvIF8gXHwgfCB8IHwgJ19ffCAnXyBcIC8gXyBcIHwgfCB8CiAgfCB8ICB8IHwgfCAoX3wgfCB8IHwgKF98IHwgfF98IHwgKF8pIHwgfCB8IHw6IHwgfF9ffCB8IChfKSB8IHxffCB8IHwgIHwgfCB8IHwgIF9fLyB8X3wgfAogIHxffCAgfF98X3xcX18sIHxffCAgXF9fLF98XF9ffF98XF9fXy98X3wgfF98OiAgXF9fX18vIFxfX18vIFxfXyxffF98ICB8X3wgfF98XF9fX3xcX18sIHwKICAgICAgICAgICAgIF9fLyB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgIDogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIF9fLyB8CiAgICAgICAgICAgIHxfX18vICAgICAgICAgICAgICAgICAgICAgICAgICAgICA6ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHxfX18vIAo="
-
-
-
-
-
 
 
 #!! target: description
@@ -59,7 +54,7 @@ prep:
 	@echo "Let's make sure your AWS CLI is configured, press return to avoid making changes to existing configurations..."
 	@aws configure
 	@echo "Creating local configuration directory and files in $(HOME)/.$(CONFIG_NAME)..."
-	@mkdir -p $(HOME)/.$(CONFIG_NAME)/{ansible,tf,logs,ec2,eks}
+	@mkdir -p $(HOME)/.$(CONFIG_NAME)/{ansible,tf,logs,ec2,kube}
 	@if [ ! -f $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS) ]; then \
 		echo "Copying default terraform customization variables to $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)..."; \
 		cp ./automation/configs/user.tfvars $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS); \
