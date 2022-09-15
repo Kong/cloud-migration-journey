@@ -1,5 +1,8 @@
 .DEFAULT_GOAL := help
 
+# Default text editor for "prep" target
+KMJ_EDITOR ?= "code"
+
 # Project Configuration
 CONFIG_NAME ?= kmj
 
@@ -51,18 +54,20 @@ build:
 #!! prep: Prepare your local workstation for the Kong Migration Journey demo.
 prep:
 	@clear
-	@echo "Let's make sure your AWS CLI is configured, press return to avoid making changes to existing configurations..."
+	@printf "\nLet's make sure your AWS CLI is configured, press return to avoid making changes to existing configurations...\n\n"
 	@aws configure
-	@echo "Creating local configuration directory and files in $(HOME)/.$(CONFIG_NAME)..."
+	@printf "\nDone!\n\nCreating local configuration directory and files in $(HOME)/.$(CONFIG_NAME)...\n"
 	@mkdir -p $(HOME)/.$(CONFIG_NAME)/{ansible,tf,logs,ec2,kube,kong}
 	@if [ ! -f $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS) ]; then \
-		echo "Copying default terraform customization variables to $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)..."; \
+		printf "Copying default Kong Migration Journey configuration to $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)...\n"; \
 		cp ./automation/configs/user.tfvars $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS); \
 	else \
-		echo "Default terraform customization variables exist, not copying..."; \
+		printf "Default terraform customization variables exist, not copying...\n"; \
 	fi
-	@printf "\n\n"
-	@printf "To customize your demo infrastructure, such as AWS region and availability zones, edit:\n$(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)\nDone!\n"
+	@printf "\nDone!\n\nCustomizing your Kong Migration Journey configuration...\n"
+	@$(KMJ_EDITOR) $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)
+	@printf "\nDone!\n\n"
+	@printf "To customize your demo infrastructure again, you can always edit:\n$(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)\n\nDone!\n\n"
 
 
 #!! infra.deploy: Deploys your Kong Migration Journey demo infrastructure.
