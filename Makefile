@@ -54,7 +54,7 @@ prep:
 	@echo "Let's make sure your AWS CLI is configured, press return to avoid making changes to existing configurations..."
 	@aws configure
 	@echo "Creating local configuration directory and files in $(HOME)/.$(CONFIG_NAME)..."
-	@mkdir -p $(HOME)/.$(CONFIG_NAME)/{ansible,tf,logs,ec2,kube}
+	@mkdir -p $(HOME)/.$(CONFIG_NAME)/{ansible,tf,logs,ec2,kube,kong}
 	@if [ ! -f $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS) ]; then \
 		echo "Copying default terraform customization variables to $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)..."; \
 		cp ./automation/configs/user.tfvars $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS); \
