@@ -56,6 +56,23 @@ variable "eks" {
 
 variable "me" {
   type        = string
-  description = "auto personalization of kong migration journey demo environment"
+  description = "auto personalization of kong migration journey demo environment infrastructure"
   default     = ""
+}
+
+variable "konnect_pass" {
+  type = string
+  description = "Kong Konnect instance password"
+  default = ""
+}
+
+variable "konnect_user" {
+  type        = string
+  description = "Kong Konnect instance username"
+  default     = ""
+}
+
+variable "konnect_instance_id" {
+  type = string
+  description = "Kong Konnect Control Plane instance ID"
 }
