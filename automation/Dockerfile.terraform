@@ -1,0 +1,17 @@
+FROM hashicorp/terraform:latest as build
+
+COPY ./terraform_infra/ /kmj
+
+# run init to ensure we have everything required and lay down directory structures
+RUN cd /kmj && \
+    terraform init && \
+    mkdir -p /kmj/out/{ansible,tf}
+
+
+
+# Now build the image
+FROM hashicorp/terraform:latest
+
+COPY --from=build /kmj /kmj
+
+WORKDIR /kmj

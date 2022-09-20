@@ -14,7 +14,7 @@ zones:
       install: true
       dp_addr: <runtime instance private ip>
       dp_advertised_ip: <runtime instance public ip>
-    egress: 
+    egress:
       install: true
       host: <runtime instance public ip>
       dp_addr: <runtime instance private ip>
@@ -26,7 +26,7 @@ dataplanes:
     zone_addr: <runtime-instance private ip>
     dp_manifest:
       outbound:
-        tags: 
+        tags:
           kuma_service: monolith-service_svc_5000
   - name: "monolith"
     dp_type: "standard"

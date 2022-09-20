@@ -19,7 +19,7 @@ provider "aws" {
   region = var.aws_region
   default_tags {
     tags = {
-      Project = "migration-journey"
+      Project = "kong-migration-journey"
     }
   }
 }
@@ -28,14 +28,45 @@ provider "tls" {}
 provider "local" {}
 
 locals {
-  cluster_name = "kong-mesh-cloud"
+  cluster_name = "${var.me}-kong-mesh-cloud"
+  kubeconfig = <<KUBECONFIG
+
+
+---
+apiVersion: v1
+clusters:
+- cluster:
+    server: ${module.eks.cluster_endpoint}
+    certificate-authority-data: ${module.eks.cluster_certificate_authority_data}
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: aws
+  name: aws
+current-context: aws
+kind: Config
+preferences: {}
+users:
+- name: aws
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1alpha1
+      command: aws-iam-authenticator
+      args:
+        - "token"
+        - "--region"
+        - "${var.aws_region}"
+        - "-i"
+        - "${local.cluster_name}"
+KUBECONFIG
 }
 
 module "vpc_eks" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.14.2"
   cidr    = var.vpc_cidr
-  name    = "kong-mesh-migration-journey"
+  name    = "${var.me}-kong-mesh-migration-journey"
   azs     = var.eks.az
 
   public_subnets  = var.eks.public_subnets
@@ -80,7 +111,7 @@ module "eks" {
   }
   eks_managed_node_groups = {
     one = {
-      name = "kong-mesh-node"
+      name = "${var.me}-kong-mesh"
 
       instance_types = ["t3.medium"]
 
@@ -96,8 +127,7 @@ module "eks" {
 }
 
 module "on_prem_subnets" {
-  source = "./modules/addsubnet"
-
+  source         = "./modules/addsubnet"
   vpc_id         = module.vpc_eks.vpc_id
   igw_id         = module.vpc_eks.igw_id
   public_subnets = var.onprem_subnets
@@ -113,7 +143,7 @@ resource "tls_private_key" "kong" {
 }
 
 resource "aws_security_group" "main" {
-  name        = "migration-journey"
+  name        = "${var.me}-kong-migration-journey"
   description = "Kong and Mesh Traffic Rules"
   vpc_id      = module.vpc_eks.vpc_id
 
@@ -145,7 +175,7 @@ resource "aws_security_group" "main" {
 }
 
 resource "aws_key_pair" "key_pair" {
-  key_name   = "mj-kong"
+  key_name   = "${var.me}-kmj"
   public_key = tls_private_key.kong.public_key_openssh
 }
 
@@ -197,7 +227,7 @@ resource "aws_instance" "node" {
 }
 
 resource "aws_db_subnet_group" "main" {
-  name       = "kong-mesh-zone-cp-rds"
+  name       = "${var.me}-kong-mesh-zone-cp-rds"
   subnet_ids = module.on_prem_subnets.public_subnets
 
   tags = {
@@ -220,30 +250,35 @@ resource "aws_db_instance" "main" {
 
 resource "local_file" "private_key" {
   content         = tls_private_key.kong.private_key_pem
-  filename        = "ec2.key"
+  filename        = "out/ec2/ec2.key"
   file_permission = "0600"
 }
 
 resource "local_file" "public_key" {
   content         = tls_private_key.kong.public_key_pem
-  filename        = "ec2.pub"
+  filename        = "out/ec2/ec2.pub"
   file_permission = "0600"
 }
 
 resource "local_file" "inventory" {
-  content  = templatefile("inventory.tpl", { aws_nodes = aws_instance.node, node_map = var.nodes })
-  filename = "inventory"
+  content  = templatefile("inventory.yml.tpl", { aws_nodes = aws_instance.node, node_map = var.nodes })
+  filename = "out/ansible/inventory.yml"
+}
+
+resource "local_file" "kubeconfig" {
+  content  = "${local.kubeconfig}"
+  filename = "out/kube/kubeconfig"
 }
 
 #this needs to be tested
-resource "local_file" "kuma" {
-  content  = templatefile("kuma.tpl", { 
-    global_cp_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "kuma-global-cp")], 
-    zone_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "runtime-instance")],
-    gateway_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "runtime-instance")],
-    monolith_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "monolith")]})
-  filename = "kuma.yml"
-}
+# resource "local_file" "kuma" {
+#  content  = templatefile("kuma.yml.tpl", { 
+#    global_cp_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "kuma-global-cp")], 
+#    zone_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "runtime-instance")],
+#    gateway_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "runtime-instance")],
+#    monolith_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "monolith")]})
+#  filename = "kuma.yml"
+#}
 
 output "cluster_id" {
   description = "EKS cluster ID"
