@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 # Default text editor for "prep" target
-KMJ_EDITOR ?= "code"
+KMJ_EDITOR ?= "vi"
 
 # Project Configuration
 CONFIG_NAME ?= kmj
