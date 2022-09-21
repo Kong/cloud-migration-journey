@@ -179,35 +179,26 @@ resource "aws_key_pair" "key_pair" {
   public_key = tls_private_key.kong.public_key_openssh
 }
 
-data "aws_ami" "amzLinux" {
-  most_recent = true
-  owners      = ["amazon"]
+data "aws_ami" "image" {
 
-  filter {
-    name   = "name"
-    values = ["amzn2*"]
-  }
-  filter {
-    name   = "root-device-type"
-    values = ["ebs"]
-  }
+    most_recent = true
+    owners = ["099720109477"] # Canonical
+    filter {
+        name   = "name"
+        values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+    }
 
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
+    filter {
+        name   = "virtualization-type"
+        values = ["hvm"]
+    }    
 }
 
 
 resource "aws_instance" "node" {
   for_each = var.nodes
 
-  ami                         = data.aws_ami.amzLinux.id
+  ami                         = data.aws_ami.image.id
   instance_type               = "t2.small"
   associate_public_ip_address = true
   key_name                    = aws_key_pair.key_pair.key_name
@@ -261,7 +252,12 @@ resource "local_file" "public_key" {
 }
 
 resource "local_file" "inventory" {
-  content  = templatefile("inventory.yml.tpl", { aws_nodes = aws_instance.node, node_map = var.nodes })
+  content  = templatefile("inventory.yml.tpl", {
+    global_cp_node = aws_instance.node["kuma-global-cp"], 
+    zone_node = aws_instance.node["runtime-instance"],
+    gateway_node = aws_instance.node["runtime-instance"],
+    monolith_node = aws_instance.node["monolith"]
+  })
   filename = "out/ansible/inventory.yml"
 }
 
@@ -270,15 +266,19 @@ resource "local_file" "kubeconfig" {
   filename = "out/kube/kubeconfig"
 }
 
-#this needs to be tested
-# resource "local_file" "kuma" {
-#  content  = templatefile("kuma.yml.tpl", { 
-#    global_cp_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "kuma-global-cp")], 
-#    zone_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "runtime-instance")],
-#    gateway_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "runtime-instance")],
-#    monolith_node = aws_instance.node[index(aws_instance.node.*.tags["Name"], "monolith")]})
-#  filename = "kuma.yml"
-#}
+resource "local_file" "kuma" {
+ content  = templatefile("kuma.yml.tpl", { 
+   kong_mesh_version = var.kong_mesh_version,
+   konnect_pass = var.konnect_pass,
+   konnect_user = var.konnect_user,
+   konnect_controlPlane = var.konnect_instance_id,
+   global_cp_node = aws_instance.node["kuma-global-cp"], 
+   zone_node = aws_instance.node["runtime-instance"],
+   gateway_node = aws_instance.node["runtime-instance"],
+   monolith_node = aws_instance.node["monolith"]
+ })
+ filename = "out/ansible/kuma.yml"
+}
 
 output "cluster_id" {
   description = "EKS cluster ID"
