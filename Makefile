@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 # Default text editor for "prep" target
-KMJ_EDITOR ?= "code"
+KMJ_EDITOR ?= "vi"
 
 # Project Configuration
 CONFIG_NAME ?= kmj
@@ -17,6 +17,10 @@ AWS_CREDS_PATH ?= $(HOME)/.aws/credentials
 # Terraform
 TF_VARS ?= user.tfvars
 
+# Ansible
+PHASE1 = phase_1_gateway.yaml
+PHASE2 = phase_2_mesh.yaml
+PHASE3 = x.yaml
 
 # Help Outputs
 # base64 encoded due to shell char issues for help menu output
@@ -90,6 +94,48 @@ infra.deploy:
 			> $(HOME)/.$(CONFIG_NAME)/logs/infra.deploy.log 2>&1; \
 		if [ $$? -ne 0 ]; then echo "Error with deployment. See logs for details!"; else echo "Done!";fi
 	@printf "\n\nReview the logs at:\n$(HOME)/.$(CONFIG_NAME)/logs/infra.deploy.log\n"
+
+
+#!! kong.phase1: Installs example on-prem payments monolith app and creates Kong Konnect run-time instance
+kong.phase1:
+	@clear
+	@echo "Deploying Kong Migration Journey Phase1 ..."
+	@- docker run \
+		--rm \
+		-v $(HOME)/.$(CONFIG_NAME):/$(CONFIG_NAME)/out \
+		--name=$(IMAGE_BASE_NAME)-ansible \
+		$(IMAGE_BASE_NAME)-ansible:latest \
+			/$(CONFIG_NAME)/$(PHASE1) \
+			-i $(CONFIG_NAME)/out/ansible/inventory.yml; \
+		if [ $$? -new 0]; then echo "Error with Phase1."; else echo "Done!";fi
+
+
+#!! kong.phase2: Installs Kong Mesh on-prem zone and configuration
+kong.phase2:
+	@clear
+	@echo "Deploying Kong Migration Journey Phase2 ..."
+	@- docker run \
+		--rm \
+		-v $(HOME)/.$(CONFIG_NAME):/$(CONFIG_NAME)/out \
+		--name=$(IMAGE_BASE_NAME)-ansible \
+		$(IMAGE_BASE_NAME)-ansible:latest \
+			/$(CONFIG_NAME)/$(PHASE2) \
+			-i $(CONFIG_NAME)/out/ansible/inventory.yml
+		if [ $$? -new 0]; then echo "Error with Phase2."; else echo "Done!";fi
+
+
+#!! kong.phase3: Installs Kong Mesh cloud zone and deploys microservice to Kubernetes
+kong.phase3:
+	@clear
+	@echo "Deploying Kong Migration Journey Phase3 ..."
+	@- docker run \
+		--rm \
+		-v $(HOME)/.$(CONFIG_NAME):/$(CONFIG_NAME)/out \
+		--name=$(IMAGE_BASE_NAME)-ansible \
+		$(IMAGE_BASE_NAME)-ansible:latest \
+			/$(CONFIG_NAME)/$(PHASE3) \
+			-i $(CONFIG_NAME)/out/ansible/inventory.yml
+		if [ $$? -new 0]; then echo "Error with Phase3."; else echo "Done!";fi
 
 
 #!! infra.destroy: Destroys all of your Kong Migration Journey demo infrastructure.
