@@ -83,20 +83,22 @@ From your shell:
     This will create all the required cloud infrastructure, as well as generate an Ansible inventory file and other variables files for the demo in your `~/.kmj` directory (created by `make prep`).  It will also generate a `kubeconfig`, and EC2 keys for accessing your cloud infrastructure.  
     > **NOTE:** It is extremely important that you do not remove your `~/.kmj` directory, or any of its contents at this point.  You will have a hard time cleaning up later.
 
+    [Explore: infrastructure deployment](docs/explore/infra_deploy.md).
+
 1. Deploy the Kong Migration Journey phase 1:
     > `make kong.phase1`
 
-    [Explore phase 1](docs/explore/phase1.md).
+    [Explore: Phase 1](docs/explore/phase1.md).
 
 1. Deploy the Kong Migration Journey phase 2:
     > `make kong.phase2`
 
-    [Explore phase 2](docs/explore/phase2.md).
+    [Explore: Phase 2](docs/explore/phase2.md).
 
 1. Deploy the Kong Migration Journey phase 3:
     > `make kong.phase3`
 
-    [Explore phase 3](docs/explore/phase3.md)
+    [Explore: Phase 3](docs/explore/phase3.md).
 
 
 ### Cleanup
