@@ -4,6 +4,7 @@
 konnect_instance_id = ""
 konnect_user        = ""
 konnect_pass        = ""
+me = "hello-me"
 
 # AWS Infrastructure Settings
 aws_region          = "us-west-2"

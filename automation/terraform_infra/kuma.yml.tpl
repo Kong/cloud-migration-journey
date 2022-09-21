@@ -1,40 +1,49 @@
-kong_mesh_version: 1.8.1
+kong_mesh_version: ${kong_mesh_version}
 global_cp:
-%{ for node in aws_nodes ~}
-%{if node.tags["Name"] == "kuma-global-cp" }addr:${node.public_ip}%{ endif ~}
-%{ endfor ~}
+  addr:${global_cp_node.public_ip}
+
+konnect_password: "${konnect_pass}"
+konnect_username: "${konnect_user}"
+konnect_controlPlane: "${konnect_controlPlane}"
 
 zones:
   - name: "on_prem"
     type: "universal"
-    host: <runtime-instance public_ip>
-    zone_addr: <runtime-instance private ip>
+    host: ${zone_node.public_ip}
+    zone_addr: ${zone_node.private_ip}
     ingress:
-      host: <runtime instance public ip>
+      host: ${zone_node.public_ip}
       install: true
-      dp_addr: <runtime instance private ip>
-      dp_advertised_ip: <runtime instance public ip>
+      dp_addr: ${zone_node.private_ip}
+      dp_advertised_ip: ${zone_node.private_ip}
     egress:
       install: true
-      host: <runtime instance public ip>
-      dp_addr: <runtime instance private ip>
+      host: ${zone_node.public_ip}
+      dp_addr: ${zone_node.private_ip}
 
 dataplanes:
   - name: "gateway"
     dp_type: "gateway"
     zone_type: "universal"
-    zone_addr: <runtime-instance private ip>
+    zone_addr: ${zone_node.private_ip}
     dp_manifest:
+      networking:
+        addr: ${gateway_node.private_ip}
       outbound:
-        tags:
-          kuma_service: monolith-service_svc_5000
+       - port: 33033
+         kuma_service: monolith-service_svc_5000
+       - port: 33034
+         kuma_service: microservice_microservice_svc_8080
   - name: "monolith"
     dp_type: "standard"
     zone_type: "universal"
-    zone_addr: <runtime-instance private ip>
+    zone_addr: ${zone_node.private_ip}
     dp_manifest:
+      networking:
+        addr: ${monolith_node.private_ip}
       inbound:
         port: 5000
         svc_port: 8080
         tags:
           kuma_service: monolith-service_svc_5000
+      

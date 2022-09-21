@@ -61,18 +61,25 @@ variable "me" {
 }
 
 variable "konnect_pass" {
-  type = string
+  type        = string
   description = "Kong Konnect instance password"
-  default = ""
+  nullable    = false
 }
 
 variable "konnect_user" {
   type        = string
   description = "Kong Konnect instance username"
-  default     = ""
+  nullable    = false
 }
 
 variable "konnect_instance_id" {
-  type = string
+  type        = string
   description = "Kong Konnect Control Plane instance ID"
+  nullable    = false
+}
+
+variable "kong_mesh_version" {
+  type        = string
+  description = "version of Kong Mesh that will be installed"
+  default     = "1.8.1"
 }
