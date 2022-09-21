@@ -1,0 +1,1 @@
+Graphics for our documentation will be stored here.
