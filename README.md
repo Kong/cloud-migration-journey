@@ -26,7 +26,7 @@
 
 ## Description and purpose
 
-This demo will provide you with an understanding of how Kong Gateway and Kong Mesh can be leveraged to de-risk and lift-and-shift connections during a migration to the cloud.  We will deploy an example monolithic application (in the cloud) to simulate an on-premise environment.  We will also deploy a Kubernetes environment where services migrated from the monolith will be migrated to.  
+This demo will provide you with an understanding of how Kong Gateway and Kong Mesh can be leveraged to de-risk and lift-and-shift connections during a migration to the cloud.  We will deploy an example monolithic application (in the cloud) to simulate an on-premise environment.  We will also deploy a Kubernetes environment where services migrated from the monolith will be moved to.  
 
 
 ### Migration Journey Phases
@@ -40,7 +40,7 @@ In phase 3 we will ...
 
 ## Using this repository
 
-This repository uses a `Makefile` as the main entrypoint for the demo.  We are using `AWS` for our demo infrastructure, `Terraform` to deploy the AWS infrastructure, and `Ansible` to deploy the Kong services to the environments.  In addition, we are using `Docker` to package up the code found in this repository to simplify the need to have much of the tooling installed locally.
+This repository uses a `Makefile` as the main entry-point for the demo.  We are using `AWS` for our demo infrastructure, `Terraform` to deploy the AWS infrastructure, and `Ansible` to deploy the Kong services to the environments.  In addition, we are using `Docker` to package up the code found in this repository and any tooling required to simplify the locally installed prerequisites for the user of this project.
 
 
 ### Prerequisites
@@ -49,12 +49,21 @@ The following is required to use this demo repository:
 
 1. Linux or MacOS
 1. AWS account with permissions to create VPCs, Subnets, EC2 instances, EKS Clusters, Keys, etc.
-1. A [Kong Konnect](https://cloud.konghq.com/login) account and run-time instance
+1. A [Kong Konnect](https://cloud.konghq.com/login) account and instance group
 1. A Kong Enterprise license (optional)
 1. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 1. [Docker](https://docs.docker.com/engine/install/) or [Docker Desktop](https://docs.docker.com/engine/install/#desktop)
 1. [Make](https://www.gnu.org/software/make/)
+    ```bash
+    # MacOS
+    brew install make
 
+    # Debian (Ubuntu)
+    apt-get install make
+
+    # Enterprise Linux
+    yum install make
+    ```
 
 ### Getting Started
 
