@@ -29,6 +29,7 @@
       vars:
         addr: "{{ dataplane['dp_manifest']['networking']['addr'] }}"
         service: "{{ dataplane['name'] }}"
+        inbound_kuma_service:  "{{ dataplane['dp_manifest']['inbound']['tags']['kuma_service'] }}"
         outbound: "{{ dataplane['dp_manifest']['outbound'] }}"
       when: dataplane['dp_type'] is defined and dataplane['dp_type'] == "gateway"
 

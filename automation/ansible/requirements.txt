@@ -1,2 +1,2 @@
-ansible
-kubernetes
+ansible-core == 2.13.4
+kubernetes == 22.6.0

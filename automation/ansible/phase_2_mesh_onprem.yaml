@@ -1,5 +1,4 @@
 ---
-## Play 1 OnPrem
 - hosts: all
   vars:
     global_cp_service: "kuma-cp.service"
@@ -9,7 +8,7 @@
     egress_service: "kuma-egress.service"
     global_cp_addr: "{{ global_cp['addr'] }}"
   vars_files:
-    - vars/kuma.yml.personal
+    - "{{ kuma_vars_file }}"
   
   tasks:
   - name: Install Kuma Requirements
@@ -57,7 +56,7 @@
     ansible.builtin.include_tasks: 
       file: tasks/mesh/mesh-universal-dp.yaml
     vars: 
-      dataplane: "{{ dataplanes | selectattr('name', 'eq', 'gateway') | first }}"
+      dataplane: "{{ dataplanes | selectattr('dp_type', 'eq', 'gateway') | first }}"
       sysd_service: "{{ dp_service }}"
     when: inventory_hostname in groups["gateway"]
   
@@ -68,45 +67,3 @@
       dataplane: "{{ dataplanes | selectattr('name', 'eq', 'monolith') | first }}"
       sysd_service: "{{ dp_service }}"
     when: inventory_hostname in groups["monolith"]
-
-###Play2 Cloud 
-- hosts: localhost 
-  gather_facts: false
-  connection: local
-  vars:
-    global_cp_addr: "{{ global_cp['addr'] }}"
-  vars_files:
-    - vars/kuma.yml.personal
-
-  tasks:
-  - name: Install K8s Cloud Zone and Microservices
-    block: 
-    - name: Install K8s Based Zone CP/Ingress/Egress 
-      ansible.builtin.include_tasks: 
-        file: tasks/mesh/mesh-k8s.yaml
-      vars:
-        kong_version: "{{ kong_mesh_version }}"
-        zone: "{{ item }}"
-      loop: "{{ zones | selectattr('type', 'eq', 'k8s') | list }}"
-  
-    - name: Create Microservice Namespace
-      kubernetes.core.k8s:
-          state: present
-          definition:
-            apiVersion: v1
-            kind: Namespace
-            metadata:
-              name: microservice
-              labels:
-                kuma.io/sidecar-injection: enabled
-
-    - name: Run Microservice Deployment
-      kubernetes.core.k8s:
-        state: present
-        src: kuberentes/microservice.yaml
-        namespace: microservice
-
-    module_defaults: 
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kube_config }}"
-        clusterconext: "{{ cluster_context }}"

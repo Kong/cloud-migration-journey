@@ -6,7 +6,7 @@ networking:
   gateway:
     type: DELEGATED
     tags:
-      kuma.io/service: kong
+      kuma.io/service: {{ inbound_kuma_service }}
   outbound:
 {% for out in outbound %}
     - port: {{ out.port }}

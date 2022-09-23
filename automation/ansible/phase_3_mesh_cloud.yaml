@@ -1,0 +1,42 @@
+---
+- hosts: localhost 
+  gather_facts: false
+  connection: local
+  vars:
+    global_cp_addr: "{{ global_cp['addr'] }}"
+  vars_files:
+    - "{{ kuma_vars_file }}"
+
+  tasks:
+  - name: Install Mesh Cloud Zone on k8s
+    block: 
+    - name: Install K8s Based Zone CP/Ingress/Egress 
+      ansible.builtin.include_tasks: 
+        file: tasks/mesh/mesh-k8s.yaml
+      vars:
+        kong_version: "{{ kong_mesh_version }}"
+        zone: "{{ item }}"
+      loop: "{{ zones | selectattr('type', 'eq', 'k8s') | list }}"
+  
+  - name: Install Microservices
+    block:
+    - name: Create Microservice Namespace
+      kubernetes.core.k8s:
+          kubeconfig: "{{ item.kube_config }}"
+          state: present
+          definition:
+            apiVersion: v1
+            kind: Namespace
+            metadata:
+              name: "{{ item.ns }}"
+              labels:
+                kuma.io/sidecar-injection: enabled
+      loop: "{{ dataplanes | selectattr('zone_type', 'eq', 'k8s') | list }}"
+
+    - name: Run Microservice Deployment
+      kubernetes.core.k8s:
+        state: present
+        src: "{{ item.deployment_file }}"
+        namespace: "{{ item.ns }}"
+        kubeconfig: "{{ item.kube_config }}"
+      loop: "{{ dataplanes | selectattr('zone_type', 'eq', 'k8s') | list }}"

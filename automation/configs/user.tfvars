@@ -1,10 +1,12 @@
 # Kong Migration Journey configuration file
+#Kong Mesh License
+kong_license_path = "<add-kong-license-path>"
 
 # Kong Konnect Settings
-konnect_instance_id = ""
-konnect_user        = ""
-konnect_pass        = ""
-me = "hello-me"
+konnect_instance_id = "<replace-me>"
+konnect_user        = "<replace-me>"
+konnect_pass        = "<replace-me>"
+me = "<replace-me>"
 
 # AWS Infrastructure Settings
 aws_region          = "us-west-2"

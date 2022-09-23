@@ -20,6 +20,7 @@ provider "aws" {
   default_tags {
     tags = {
       Project = "kong-migration-journey"
+      who = var.me
     }
   }
 }
@@ -251,6 +252,11 @@ resource "local_file" "public_key" {
   file_permission = "0600"
 }
 
+resource "local_file" "kubeconfig" {
+  content  = "${local.kubeconfig}"
+  filename = "out/kube/kubeconfig"
+}
+
 resource "local_file" "inventory" {
   content  = templatefile("inventory.yml.tpl", {
     global_cp_node = aws_instance.node["kuma-global-cp"], 
@@ -261,14 +267,11 @@ resource "local_file" "inventory" {
   filename = "out/ansible/inventory.yml"
 }
 
-resource "local_file" "kubeconfig" {
-  content  = "${local.kubeconfig}"
-  filename = "out/kube/kubeconfig"
-}
-
 resource "local_file" "kuma" {
  content  = templatefile("kuma.yml.tpl", { 
    kong_mesh_version = var.kong_mesh_version,
+   kong_license_path = var.kong_license_path,
+   kubeconfig_path = "out/kube/kubeconfig",
    konnect_pass = var.konnect_pass,
    konnect_user = var.konnect_user,
    konnect_controlPlane = var.konnect_instance_id,

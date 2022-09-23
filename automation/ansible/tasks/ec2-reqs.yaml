@@ -1,45 +1,56 @@
 ---
-- name: Install Pre-requisite Pkgs
-  ansible.builtin.apt:
-    pkg:
-    - ca-certificates
-    - curl
-    - gnupg
-    - lsb-release
-    - openssl
-    - python3-pip
+- name: Installing the Ubuntu Pre-requisites
+  block: 
+  - name: Update Apt Cache
+    ansible.builtin.apt:
+      update_cache: yes
+      cache_valid_time: 3600
+
+  - name: Install Pre-requisite Pkgs
+    ansible.builtin.apt:
+      pkg:
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+      - openssl
+      - python3-pip
+
+  - name: Add signing key
+    ansible.builtin.apt_key:
+      url: "https://download.docker.com/linux/ubuntu/gpg"
+      state: present
+
+  - name: Add repository into sources list
+    ansible.builtin.apt_repository:
+      repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+      state: present
+      filename: docker
+
+  - name: Install Docker
+    ansible.builtin.apt:
+      pkg: 
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      state: latest
+
+  - name: Start Docker Process
+    ansible.builtin.service:
+      name: docker
+      state: started
+      enabled: yes
+
+  - name: Add "{{ ansible_user }}" to docker group
+    ansible.builtin.user:
+      name: "{{ ansible_user }}"
+      groups: docker
+      append: yes
+
+  - name: Install Pip docker-py pkg
+    ansible.builtin.pip:
+      name: docker
   become: true
 
-- name: One way to avoid apt_key once it is removed from your distro
-  block:
-    - name: docker repo |no apt key
-      ansible.builtin.get_url:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        dest: /etc/apt/trusted.gpg.d/dockerrepo.asc
-
-    - name: docker repo | apt source
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/dockerrepo.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-        state: present
-  become: true
-
-- name: Install Docker
-  ansible.builtin.apt:
-    pkg: 
-    - docker-ce
-    - docker-ce-cli
-    - containerd.io
-    state: present
-  become: true
-
-- name: Add "{{ ansible_user }}" to docker group
-  ansible.builtin.user:
-    name: "{{ ansible_user }}"
-    groups: docker
-    append: yes
-  become: true
-
-- name: Install Pip docker-py pkg
-  ansible.builtin.pip:
-    name: docker
-  become: true
+-  name: Reset the Connection for "{{ ansible_user }}" to access Docker Daemon
+   ansible.builtin.meta: reset_connection

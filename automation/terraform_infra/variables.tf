@@ -83,3 +83,8 @@ variable "kong_mesh_version" {
   description = "version of Kong Mesh that will be installed"
   default     = "1.8.1"
 }
+
+variable "kong_license_path" {
+  type = string 
+  description = "path to the kong mesh license"
+}

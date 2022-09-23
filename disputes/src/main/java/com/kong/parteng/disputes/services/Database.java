@@ -21,6 +21,12 @@ public class Database {
     public Database() {
 
         disputes = new ArrayList<>();
+        CreateDispute cd = new CreateDispute();
+        cd.setCardId("1234");
+        cd.setChargeId("45678");
+        cd.setReason("Duplicate Charge");
+
+        createDispute(cd);
 
     }
 

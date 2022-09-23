@@ -34,6 +34,8 @@ ENV PYTHONPATH=/usr/local/lib/python3.10/site-packages:/root/ansible/pip/usr/loc
 ENV PATH=/root/ansible/pip/usr/local/bin:$PATH
 ENV ANSIBLE_FORCE_COLOR=1
 
+RUN apk add --update --no-cache openssh-client
+
 COPY --from=build /root/ansible /root/ansible
 
 COPY --from=build /bin/helm /bin/helm
@@ -43,7 +45,5 @@ COPY --from=build /bin/aws-iam-authenticator /bin/aws-iam-authenticator
 COPY --from=build /kmj /kmj
 
 COPY --from=build /usr/bin/ssh /usr/bin/ssh
-
-# RUN apk add --update --no-cache openssh-client
 
 ENTRYPOINT [ "ansible-playbook" ]

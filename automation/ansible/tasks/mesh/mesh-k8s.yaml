@@ -30,7 +30,7 @@
           - "vars/helm/values-kong-mesh-zone-{{zone['name']}}.yaml"
         create_namespace: true
         kubeconfig: "{{ zone['kube_config'] }}"
-        context: "{{ zone['cluster_context'] }}"
+        # context: "{{ zone['cluster_context'] }}"
         wait: true 
       register: helm_command
     
