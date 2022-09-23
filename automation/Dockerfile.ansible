@@ -44,6 +44,8 @@ COPY --from=build /kmj /kmj
 
 COPY --from=build /usr/bin/ssh /usr/bin/ssh
 
-# RUN apk add --update --no-cache openssh-client
+COPY --from=build /usr/bin/sftp /usr/bin/sftp
+
+COPY --from=build /usr/bin/scp /usr/bin/scp
 
 ENTRYPOINT [ "ansible-playbook" ]
