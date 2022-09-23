@@ -24,8 +24,7 @@ RUN wget https://get.helm.sh/helm-${HELM_VER}-linux-${ARCH}.tar.gz \
     chmod +x /bin/helm; \
     wget  https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v${AWS_IAM_AUTHENTICATOR_VER}/aws-iam-authenticator_${AWS_IAM_AUTHENTICATOR_VER}_linux_${ARCH} \
         -O /bin/aws-iam-authenticator && \
-    chmod +x /bin/aws-iam-authenticator && \
-    apk add --update --no-cache openssh-client;
+    chmod +x /bin/aws-iam-authenticator; 
 
 # Create final product
 FROM python:3.10-alpine
@@ -44,6 +43,6 @@ COPY --from=build /bin/aws-iam-authenticator /bin/aws-iam-authenticator
 
 COPY --from=build /kmj /kmj
 
-COPY --from=build /usr/bin/ssh /usr/bin/ssh
+RUN apk add --update --no-cache openssh-client
 
 ENTRYPOINT [ "ansible-playbook" ]
