@@ -32,6 +32,7 @@ FROM python:3.10-alpine
 
 ENV PYTHONPATH=/usr/local/lib/python3.10/site-packages:/root/ansible/pip/usr/local/lib/python3.10/site-packages
 ENV PATH=/root/ansible/pip/usr/local/bin:$PATH
+ENV ANSIBLE_FORCE_COLOR=1
 
 COPY --from=build /root/ansible /root/ansible
 
