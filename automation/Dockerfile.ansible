@@ -33,6 +33,8 @@ ENV PYTHONPATH=/usr/local/lib/python3.10/site-packages:/root/ansible/pip/usr/loc
 ENV PATH=/root/ansible/pip/usr/local/bin:$PATH
 ENV ANSIBLE_FORCE_COLOR=1
 
+RUN apk add --update --no-cache openssh-client
+
 COPY --from=build /root/ansible /root/ansible
 
 COPY --from=build /bin/helm /bin/helm

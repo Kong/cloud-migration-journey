@@ -1,11 +1,12 @@
 ---
 
 - name: Install tar and gzip
-  ansible.builtin.yum:
-    name:
+  ansible.builtin.apt:
+    pkg:
       - tar
       - gzip
       - jq
+      - acl
     state: present
   become: true
 

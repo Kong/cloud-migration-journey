@@ -21,7 +21,7 @@ kuma:
     zone: "cloud"
 
     # -- Only used in `zone` mode
-    kdsGlobalAddress: "grpcs://52.10.230.78:5685"
+    kdsGlobalAddress: "grpcs://34.222.157.176:5685"
 
     autoScaling:
       enabled: true

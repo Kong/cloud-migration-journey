@@ -19,8 +19,8 @@ TF_VARS ?= user.tfvars
 
 # Ansible
 PHASE1 = phase_1_gateway.yaml
-PHASE2 = phase_2_mesh.yaml
-PHASE3 = x.yaml
+PHASE2 = phase_2_mesh_onprem.yaml
+PHASE3 = phase_3_mesh_cloud.yaml
 
 # Help Outputs
 # base64 encoded due to shell char issues for help menu output
@@ -69,6 +69,11 @@ prep:
 		printf "Default terraform customization variables exist, not copying...\n"; \
 	fi
 	@printf "\nDone!\n\nCustomizing your Kong Migration Journey configuration...\n"
+	@echo "First: Please Provide the Path to your Kong License: "; read KONG_LICENSE; 
+	@cp $$KONG_LICENSE $(HOME)/.$(CONFIG_NAME)/kong/; \
+		file=$$(basename $$KONG_LICENSE); \
+		sed -i '' "s~<add-kong-license-path>~out/kong/$$file~g" $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS); 
+	@printf "\n\Done, Second: Customize the the Kong Migration Journey configuration"
 	@$(KMJ_EDITOR) $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)
 	@printf "\nDone!\n\n"
 	@printf "To customize your demo infrastructure again, you can always edit:\n$(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)\n\nDone!\n\n"
@@ -89,12 +94,10 @@ infra.deploy:
 		$(IMAGE_BASE_NAME)-tf:latest \
 		apply -state=/$(CONFIG_NAME)/out/tf/terraform.tfstate \
 			-var-file="/root/$(TF_VARS)" \
-			-var "me=$$ME" \
 			-auto-approve \
 			> $(HOME)/.$(CONFIG_NAME)/logs/infra.deploy.log 2>&1; \
 		if [ $$? -ne 0 ]; then echo "Error with deployment. See logs for details!"; else echo "Done!";fi
 	@printf "\n\nReview the logs at:\n$(HOME)/.$(CONFIG_NAME)/logs/infra.deploy.log\n"
-
 
 #!! kong.phase1: Installs example on-prem payments monolith app and creates Kong Konnect run-time instance
 kong.phase1:
@@ -106,7 +109,8 @@ kong.phase1:
 		--name=$(IMAGE_BASE_NAME)-ansible \
 		$(IMAGE_BASE_NAME)-ansible:latest \
 			/$(CONFIG_NAME)/$(PHASE1) \
-			-i $(CONFIG_NAME)/out/ansible/inventory.yml; \
+			-i $(CONFIG_NAME)/out/ansible/inventory.yml \
+			--extra-vars "kuma_vars_file=out/ansible/kuma.yml"; \
 		if [ $$? -new 0]; then echo "Error with Phase1."; else echo "Done!";fi
 
 
@@ -120,7 +124,8 @@ kong.phase2:
 		--name=$(IMAGE_BASE_NAME)-ansible \
 		$(IMAGE_BASE_NAME)-ansible:latest \
 			/$(CONFIG_NAME)/$(PHASE2) \
-			-i $(CONFIG_NAME)/out/ansible/inventory.yml
+			-i $(CONFIG_NAME)/out/ansible/inventory.yml \
+			--extra-vars "kuma_vars_file=out/ansible/kuma.yml"; \
 		if [ $$? -new 0]; then echo "Error with Phase2."; else echo "Done!";fi
 
 
@@ -131,16 +136,29 @@ kong.phase3:
 	@- docker run \
 		--rm \
 		-v $(HOME)/.$(CONFIG_NAME):/$(CONFIG_NAME)/out \
+		-v $(AWS_CREDS_PATH):/root/.aws/credentials \
 		--name=$(IMAGE_BASE_NAME)-ansible \
 		$(IMAGE_BASE_NAME)-ansible:latest \
 			/$(CONFIG_NAME)/$(PHASE3) \
-			-i $(CONFIG_NAME)/out/ansible/inventory.yml
+			-i $(CONFIG_NAME)/out/ansible/inventory.yml \
+			--extra-vars "kuma_vars_file=out/ansible/kuma.yml"; \
 		if [ $$? -new 0]; then echo "Error with Phase3."; else echo "Done!";fi
 
 
 #!! infra.destroy: Destroys all of your Kong Migration Journey demo infrastructure.
 infra.destroy:
 	@clear
+	@echo "Unistalling the Helm Chart"
+	@ME=`whoami` && \
+	docker run \
+		--rm \
+		-v $(HOME)/.$(CONFIG_NAME):/$(CONFIG_NAME)/out \
+		-v $(AWS_CREDS_PATH):/root/.aws/credentials \
+		--entrypoint=/bin/helm \
+		--name=$(IMAGE_BASE_NAME)-helm-destroy \
+		$(IMAGE_BASE_NAME)-ansible:latest \
+		uninstall kong-mesh --namespace=kong-mesh-system --kubeconfig=/$(CONFIG_NAME)/out/kube/kubeconfig
+	@echo "Done!"
 	@echo "Destroying your Kong Migration Journey demo infrastructure..."
 	@echo "This will take some time: estimate 10-15min..."
 	@ME=`whoami` && \
@@ -153,8 +171,21 @@ infra.destroy:
 		$(IMAGE_BASE_NAME)-tf:latest \
 		destroy -state=/$(CONFIG_NAME)/out/tf/terraform.tfstate \
 			-var-file="/root/$(TF_VARS)"\
-			-var "me=$$ME" \
 			-auto-approve \
 			> $(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log 2>&1;
 	@echo "Done!"
 	@printf "\n\nReview the logs at:\n$(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log\n"
+
+helm.destroy:
+	@clear
+	@echo "Destroying the Cloud Zone"
+	@ME=`whoami` && \
+	docker run \
+		--rm \
+		-v $(HOME)/.$(CONFIG_NAME):/$(CONFIG_NAME)/out \
+		-v $(AWS_CREDS_PATH):/root/.aws/credentials \
+		--entrypoint=/bin/helm \
+		--name=$(IMAGE_BASE_NAME)-helm-destroy \
+		$(IMAGE_BASE_NAME)-ansible:latest \
+		uninstall kong-mesh --namespace=kong-mesh-system --kubeconfig=/$(CONFIG_NAME)/out/kube/kubeconfig
+
