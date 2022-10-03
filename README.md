@@ -50,10 +50,11 @@ The following is required to use this demo repository:
 1. Linux or MacOS
 1. AWS account with permissions to create VPCs, Subnets, EC2 instances, EKS Clusters, Keys, etc.
 1. A [Kong Konnect](https://cloud.konghq.com/login) account and instance group
-1. A Kong Enterprise license (optional)
+1. A Kong Enterprise license
 1. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 1. [Docker](https://docs.docker.com/engine/install/) or [Docker Desktop](https://docs.docker.com/engine/install/#desktop)
 1. [Make](https://www.gnu.org/software/make/)
+
     ```bash
     # MacOS
     brew install make
@@ -70,6 +71,7 @@ The following is required to use this demo repository:
 Once the prerequisites have been met, you can start using this project.
 
 From your shell:
+
 1. Clone the repo to your computer:
     > `git clone git@github.com:Kong/migration-journey.git`
 
@@ -84,12 +86,15 @@ From your shell:
 1. Prepare your computer to run the demo:
     > `make prep`
 
-    This will create a `.kmj` directory in your `$HOME`, as well as ensure you have your AWS CLI credentials configured.  This will also open up the Kong Migration Journey configuration file, where you populate the Kong Konnect information, as well as make changes to your AWS deployment settings.
+    This will create a `.kmj` directory in your `$HOME`, and prompt for various inputs:
+    1. AWS CLI credentials are configured  
+    2. The path to the kong license
+    3. Open up the Kong Migration Journey configuration file (users.tfvars) where you populate the Kong Konnect information, and can make any changes to your AWS infrastructure settings (AWS Region, VPC, Subnet Ids).
 
 1. Deploy the cloud infrastructure:
     > `make infra.deploy`
 
-    This will create all the required cloud infrastructure, as well as generate an Ansible inventory file and other variables files for the demo in your `~/.kmj` directory (created by `make prep`).  It will also generate a `kubeconfig`, and EC2 keys for accessing your cloud infrastructure.  
+    This will create all the required AWS infrastructure, as well as generate an Ansible inventory file and other variables files for the demo in your `~/.kmj` directory (created by `make prep`).  It will also generate the `kubeconfig`, and EC2 keys for accessing your cloud infrastructure.  
     > **NOTE:** It is extremely important that you do not remove your `~/.kmj` directory, or any of its contents at this point.  You will have a hard time cleaning up later.
 
     [Explore: infrastructure deployment](docs/explore/infra_deploy.md).
