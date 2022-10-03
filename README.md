@@ -48,7 +48,7 @@ The following is required to use this demo repository:
 1. Linux or MacOS
 1. AWS account with permissions to create VPCs, Subnets, EC2 instances, EKS Clusters, Keys, etc.
 1. A [Kong Konnect](https://cloud.konghq.com/login) account and Runtime Group ID
-    * credentials - email and password
+    * Credentials - email and password
     * Control Plane instance ID - this is described in more detail in the Kong Konnect documentation [Set up a Runtime](https://docs.konghq.com/konnect/getting-started/configure-runtime/#set-up-a-new-runtime-instance)
 1. A Kong Enterprise license
 1. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
@@ -75,7 +75,7 @@ From your shell:
 1. Clone the repo to your computer:
     > `git clone git@github.com:Kong/migration-journey.git`
 
-1. Change directory to your cloned repo from the previous step
+1. Change directory to your cloned repo from the previous step:
      > `cd migration-journey`
 
 1. View the available `make` targets for the project:
@@ -90,7 +90,7 @@ From your shell:
     This will create a `.kmj` directory in your `$HOME`, and prompt for various inputs:
     1. AWS CLI credentials are configured  
     2. The path to the kong license
-    3. Open the Kong Migration Journey configuration file (users.tfvars) where you populate the Kong Konnect information, and can make any changes to your AWS infrastructure settings (AWS Region, VPC, Subnet Ids).
+    3. Open the Kong Migration Journey configuration file (users.tfvars) where you populate the Kong Konnect information, and can make any changes to your AWS infrastructure settings (AWS Region, VPC, Subnets).
 
 1. Deploy the cloud infrastructure:
     > `make infra.deploy`

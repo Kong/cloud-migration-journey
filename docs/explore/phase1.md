@@ -2,25 +2,33 @@
 
 ## Objective
 
-The objective of phase 1 is to focus on the on-premise environment and familiarize ourselves with Konnect, Kong's managed API Gateway Platform, and configure the Konnect Runtime Group to expose the Monolith through the Runtime Instance.
+The `objective` of phase 1 is to focus on the on-premise environment and familiarize ourselves with Konnect, Kong's managed API Gateway Platform, and configure the Konnect Runtime Group to expose the Monolith through the Runtime Instance.
 
-The activities that will take place in this phase are:
+The high level `activities` that will take place in this phase are:
 
 * Configure Konnect Runtime Group to expose the Monolith Application.
 
-* Verify the configuration and connectivty to the Monolith through the Runtime Instance.
+* Verify the configuration and connectivity to the Monolith through the Runtime Instance.
+
+At the end of phase 1 you should be `comfortable` with the following:
+
+* Understand how the Konnect Runtime Instance is deploy on the "on-premise" VM.
+
+* How to configure Gateway Services and Routes in a Konnect Runtime Group.
+
+* How to reach an API exposed by the the Runtime Instance.
 
 ## Architecture
 
 ![Cloud Migration Tutorial - Phase 1](/docs/img/Phase_1.png)
 
-Konnect, is Kong's SAAS API Platform, that gives us a single managed plane to deploy and manage our APIs in any environment. In this case of our Cloud Migration, we deployed our Konnect Runtime Instance to a VM running in a VM that we designated as our `On-Premise Environment`. Using ansible, the deployment of the runtime instance and the monolith app were automated away.
+Konnect, is Kong's SAAS API Platform, that gives us a singly managed control plane to deploy and manage our APIs in any environment. In this case of our Cloud Migration, we deployed our Konnect Runtime Instance to a VM in the subnet we designated as our `On-Premise Environment`. Using ansible, the deployment of the runtime instance and the monolith app were automated away.
 
 ## Explore
 
 Here we will review through the ansible inventory, ssh into the ec2-instances to quickly explore the setup, and end with configuring the Konnect Runtime Instance and validation by consuming the monolith through.
 
-### Runtime Instance and Monolith EC2-Instance Review
+### On Prem Env
 
 First, let's open the ansible inventory file and grab the gateway and monolith host IPs.
 
@@ -28,7 +36,7 @@ First, let's open the ansible inventory file and grab the gateway and monolith h
 cat ~/.kmj/ansible/inventory.yml
 ```
 
-and grab the public IPs of the gateway (runtime instance) and monolith. An example of yaml is below. :
+Grab the public IPs of the gateway (runtime instance) and monolith. An example of yaml is below:
 
 ```yaml
     gateway:
