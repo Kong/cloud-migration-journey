@@ -69,8 +69,8 @@ prep:
 		printf "Default terraform customization variables exist, not copying...\n"; \
 	fi
 	@printf "\nDone!\n\nCustomizing your Kong Migration Journey configuration...\n"
-	@echo "First: Please Provide the Path to your Kong License: "; read KONG_LICENSE; 
-	@cp $$KONG_LICENSE $(HOME)/.$(CONFIG_NAME)/kong/; \
+	@echo "First: Please Provide the Path to your Kong License: "; read KONG_LICENSE; \
+		cp $$KONG_LICENSE $(HOME)/.$(CONFIG_NAME)/kong/; \
 		file=$$(basename $$KONG_LICENSE); \
 		sed -i '' "s~<add-kong-license-path>~out/kong/$$file~g" $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS); 
 	@printf "\n\Done, Second: Customize the the Kong Migration Journey configuration"
