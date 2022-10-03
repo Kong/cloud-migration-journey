@@ -23,25 +23,23 @@
 
 <!-- /code_chunk_output -->
 
-
 ## Description and purpose
 
-This demo will provide you with an understanding of how Kong Gateway and Kong Mesh can be leveraged to de-risk and lift-and-shift connections during a migration to the cloud.  We will deploy an example monolithic application (in the cloud) to simulate an on-premise environment.  We will also deploy a Kubernetes environment where services migrated from the monolith will be moved to.  
-
+This demo will provide you with an understanding of how Konnect and Kong Mesh can be leveraged to de-risk and lift-and-shift connections during a migration to the cloud.  We will deploy an example monolithic application (in the cloud) to simulate an on-premise environment.  We will also deploy a Kubernetes environment where services migrated from the monolith will be moved to.  
 
 ### Migration Journey Phases
 
-In phase 1 we will ...  (high level descriptions please)
+Once the AWS Infrastructure has been provisioned you will step through the Cloud Migration Journey in three phases. Each phase has an explicit objective, and will build upon the previous.
 
-In phase 2 we will ...  
+**Phase 1 :** During this Phase the Monolith and Konnect Dataplane(also referred to as a runtime instance) will be deployed. The objective of this phase is to familiarize yourself with Konnect and step through how to expose the Monolith through the Konnect.
 
-In phase 3 we will ...
+**Phase 2 :** In Phase 2, we will begin to deploy the Kong Mesh Global Control Plane and the On-Premise Environment. The objective of this phase is to familize ourselves with Kong Mesh Global Control Plane, Universal Mode, the concept of Kong Mesh Zones, and finish with re-configure our Konnect Runtime-instance so that communication flows over the mesh network.
 
+**Phase 3 :** Finally, in Phase 3 it's time to cutover. The objective is to deploy the Kong Mesh Cloud Zone and Microservice to the Amazon EKS, and execute the Traffic Route Policy that will re-direct traffic to the microservice.
 
 ## Using this repository
 
 This repository uses a `Makefile` as the main entry-point for the demo.  We are using `AWS` for our demo infrastructure, `Terraform` to deploy the AWS infrastructure, and `Ansible` to deploy the Kong services to the environments.  In addition, we are using `Docker` to package up the code found in this repository and any tooling required to simplify the locally installed prerequisites for the user of this project.
-
 
 ### Prerequisites
 
@@ -49,7 +47,9 @@ The following is required to use this demo repository:
 
 1. Linux or MacOS
 1. AWS account with permissions to create VPCs, Subnets, EC2 instances, EKS Clusters, Keys, etc.
-1. A [Kong Konnect](https://cloud.konghq.com/login) account and instance group
+1. A [Kong Konnect](https://cloud.konghq.com/login) account and Runtime Group ID
+    * credentials - email and password
+    * Control Plane instance ID - this is described in more detail in the Kong Konnect documentation [Set up a Runtime](https://docs.konghq.com/konnect/getting-started/configure-runtime/#set-up-a-new-runtime-instance)
 1. A Kong Enterprise license
 1. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 1. [Docker](https://docs.docker.com/engine/install/) or [Docker Desktop](https://docs.docker.com/engine/install/#desktop)
@@ -68,7 +68,7 @@ The following is required to use this demo repository:
 
 ### Getting Started
 
-Once the prerequisites have been met, you can start using this project.
+Once the prerequisites have been met, you can start using this project. One each make step of has been completed, navigate to the respective `Explore` documentation to follow through each deep dive.
 
 From your shell:
 
@@ -76,6 +76,7 @@ From your shell:
     > `git clone git@github.com:Kong/migration-journey.git`
 
 1. Change directory to your cloned repo from the previous step
+     > `cd migration-journey`
 
 1. View the available `make` targets for the project:
     > `make`
@@ -89,7 +90,7 @@ From your shell:
     This will create a `.kmj` directory in your `$HOME`, and prompt for various inputs:
     1. AWS CLI credentials are configured  
     2. The path to the kong license
-    3. Open up the Kong Migration Journey configuration file (users.tfvars) where you populate the Kong Konnect information, and can make any changes to your AWS infrastructure settings (AWS Region, VPC, Subnet Ids).
+    3. Open the Kong Migration Journey configuration file (users.tfvars) where you populate the Kong Konnect information, and can make any changes to your AWS infrastructure settings (AWS Region, VPC, Subnet Ids).
 
 1. Deploy the cloud infrastructure:
     > `make infra.deploy`
@@ -102,18 +103,17 @@ From your shell:
 1. Deploy the Kong Migration Journey phase 1:
     > `make kong.phase1`
 
-    [Explore: Phase 1](docs/explore/phase1.md).
+    Please Navigate to [Explore: Phase 1](docs/explore/phase1.md) for the tutorial.
 
 1. Deploy the Kong Migration Journey phase 2:
     > `make kong.phase2`
 
-    [Explore: Phase 2](docs/explore/phase2.md).
+    Please Navigate to [Explore: Phase 2](docs/explore/phase2.md) for the tutorial.
 
 1. Deploy the Kong Migration Journey phase 3:
     > `make kong.phase3`
 
-    [Explore: Phase 3](docs/explore/phase3.md).
-
+    Please Navigate to [Explore: Phase 3](docs/explore/phase3.md) for the tutorial.
 
 ### Cleanup
 
