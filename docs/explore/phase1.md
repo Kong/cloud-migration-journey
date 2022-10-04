@@ -159,8 +159,10 @@ This is the functionality (or the lack of) that we want to deprecate in favor fo
 
 **This is the end of Phase 1**
 
-Just to Recap. The objective of phase 1 was to create our on-premise environment, and expose our Monolith Application to world with a Konnect Runtime Instance.
+Just to Recap.
+
+The objective of phase 1 was to create our on-premise environment, and expose our Monolith Application to world with a Konnect Runtime Instance.
 
 Now that phase 1 is done, we are prepared for phase 2, where Kong Mesh will be introduced.
 
-Please Navigate to the Home Page to proceed with [Deploy Phase 2 of the Migration](../../README.mdL#116)
+Please Navigate to the Home Page to proceed with [Deploy Phase 2 of the Migration](../../README.md)
