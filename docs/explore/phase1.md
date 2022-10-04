@@ -36,7 +36,7 @@ First, let's open the ansible inventory file and grab the gateway and monolith h
 cat ~/.kmj/ansible/inventory.yml
 ```
 
-Grab the public IPs of the gateway (runtime instance) and monolith. An example of yaml is below:
+Grab the public IPs of the gateway (runtime instance) and monolith, these will be needed to configure the Konnect Gateway Service. An example of yaml is below:
 
 ```yaml
     gateway:
@@ -86,4 +86,54 @@ Now, let's navigate up to the Konnect console to review and configure the Runtim
 
 ### Configure Konnect Runtime Group
 
+`Objective`: Create a Gateway Service and Route to expose the Monolith.
+
+1. Login into [Konnect](https://cloud.konghq.com/login) and you will be directed to the Runtime Manager Page.
+
+![Phase 1 - 1_runtime manager](/docs/img/phase_1/1_runtimeManager.png)
+
+2.  From the Runtime Manager Page Select the appropriate `Runtime Group` where you deployed the runtime instance &#8594; in the left hand panel navigate to `Gateway Services`
+
+3. `Create Gateway Service` - Select the `+ New gateway service` button in the menu.
+
+4. `Add a new gateway servid` - We will configure the Gateway Service.
+
+    * select the `Add using Protocol,Host and Path` radio button.
+    
+    * Fill in the following information regarding how to reach the backend Monolith Application:
+        * **Gateway Service Name** = Migration
+        * **Protocol** = http
+        * **Protocol** = <Your Monolith IP>
+        * **Path** = /monolith/resources/ (the base url of the Monolith Web Service)
+        * **Port** = 8080
+
+    * Save the Gateway Service
+
+An example Gateway Service is depicted below.
+
+<p align="center">
+    <img src="../img/phase_1/2_gatewayservice.png" width="500" /></div>
+</p>
+
+5. `Create Route` - Navigate into new Gateway Service &#8594; scroll down &#8594; Add Route:
+
+    * Fill in the following information regarding how to expose the Monolith through the Runtime Instance:
+        * **Route Name** = OnPrem
+        * **Protocols** = http
+        * **Method(s)** = GET
+        * **Path(s)** = /onprem
+
+    * Save the Route
+
+An example Route is shown below.
+
+<p align="center">
+    <img src="../img/phase_1/3_route.png" width="400" /></div>
+</p>
+
+And now we are ready to validate.
+
 ### Validation
+
+For the validation, will be calling the `Route` exposed on the Runtime Instance.
+

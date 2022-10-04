@@ -4,6 +4,7 @@
   <img src="https://2tjosk2rxzc21medji3nfn1g-wpengine.netdna-ssl.com/wp-content/uploads/2018/08/kong-combination-mark-color-256px.png" /></div>
 </p>
 
+**Learn how how Konnect and Kong Mesh can be leveraged to de-risk and lift-and-shift connections during a migration to the cloud.**
 
 ## Table of Contents
 
@@ -23,13 +24,19 @@
 
 <!-- /code_chunk_output -->
 
-## Description and purpose
+## Migration Journey Overview
 
-This demo will provide you with an understanding of how Konnect and Kong Mesh can be leveraged to de-risk and lift-and-shift connections during a migration to the cloud.  We will deploy an example monolithic application (in the cloud) to simulate an on-premise environment.  We will also deploy a Kubernetes environment where services migrated from the monolith will be moved to.  
+You will step through a 3-phased approach to deprecrate a monolith, running on premise, for a new microservice running a Kuberentes cluster leveraging both Konnect and Kong Mesh to support the migration.
 
-### Migration Journey Phases
+### Monolith to Microservice
 
-Once the AWS Infrastructure has been provisioned you will step through the Cloud Migration Journey in three phases. Each phase has an explicit objective, and will build upon the previous.
+The Monolith is a Java Based Application Server that contains 4 features: Card, Balances/Charges, Payments, and Disputes. The Disputes functionality of the monolith will be deprecated for a new disputes microservice.
+
+TODO - insert image.
+
+### Phases
+
+Each phase has an explicit objective, and will build upon the previous.
 
 **Phase 1 :** During this Phase the Monolith and Konnect Dataplane(also referred to as a runtime instance) will be deployed. The objective of this phase is to familiarize yourself with Konnect and step through how to expose the Monolith through the Konnect.
 
@@ -37,7 +44,7 @@ Once the AWS Infrastructure has been provisioned you will step through the Cloud
 
 **Phase 3 :** Finally, in Phase 3 it's time to cutover. The objective is to deploy the Kong Mesh Cloud Zone and Microservice to the Amazon EKS, and execute the Traffic Route Policy that will re-direct traffic to the microservice.
 
-## Using this repository
+## Using this Repository
 
 This repository uses a `Makefile` as the main entry-point for the demo.  We are using `AWS` for our demo infrastructure, `Terraform` to deploy the AWS infrastructure, and `Ansible` to deploy the Kong services to the environments.  In addition, we are using `Docker` to package up the code found in this repository and any tooling required to simplify the locally installed prerequisites for the user of this project.
 
