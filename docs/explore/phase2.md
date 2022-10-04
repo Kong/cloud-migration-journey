@@ -1,28 +1,26 @@
 # Kong Migration Journey: Phase 2
 
+The `make kong.phase2` step built out the `Kong Mesh Global Control Plane`, created a Kong Mesh `On-Premise Zone` using the Universal Mode deployment strategy, and deployed Dataplanes (also referred to as SidecarProxies) to the Monolith and Runtime Instance.
+
 ## Objective
 
-The `make kong.phase2` step built out the `Kong Mesh Global Control Plane`, created a Kong Mesh `On-Premise Zone` using the Universal Mode deployment strategy, and deployed Dataplanes (also referred to as SidecarProxies) to the Monolith and RuntimeInstances VMs.
-
-The `objective` of Phase 2 is to being the journey with Kong Mesh by exploring the infrastructure, and then 
-
-Once the Mesh Infrastructure is ready, reconfigure Konnect so that traffic from the Runtime Instance to the Monolith flows over the mesh network.
+The `objective` of Phase 2 is to being the journey with Kong Mesh by exploring the infrastructure and reconfigure Konnect so that traffic from the Runtime Instance to the Monolith flows over the mesh network.
 
 The high level `activities` that will take place in this phase are:
 
-* Review Kong Mesh Global Control Plane Setup
+* Review Kong Mesh Global Control Plane Setup.
 
-* Review Kong Mesh Zone Services: Zone Control Plane, Zone Ingress, Zone Egress
+* Review Kong Mesh Zone Services: Zone Control Plane, Zone Ingress, Zone Egress.
 
-* Review the Dataplane (Sidecar Proxy) deployed beside the Monolith and Runtime Instance
+* Review the Dataplane (Sidecar Proxy) deployed beside the Monolith and Runtime Instance.
 
-* Reconfigure Konnect for traffic between Monolith and the Runtime Instance to move over the mesh network
+* Reconfigure Konnect for traffic between Monolith and the Runtime Instance to move over the mesh network.
 
 At the end of phase 2 you should be `comfortable` with the following:
 
-* Grasp fundamentals of Universal Mode Deployments
+* Grasp fundamentals of Universal Mode Deployments.
 
-* How to reconfigure Konnect so traffic flows over the mesh network
+* How to reconfigure Konnect so traffic flows over the mesh network.
 
 ## Architecture
 
@@ -31,6 +29,7 @@ At the end of phase 2 you should be `comfortable` with the following:
 </p>
 
 Lets review through the infrastructure.
+
 **Global Control Plane**
 
 First Kong Mesh `Global Control Plane` was deployed into an ec2-instance, but it could equally run in a Kubernetes cluster. The Global Control Plane will be responsible for:
@@ -39,6 +38,8 @@ First Kong Mesh `Global Control Plane` was deployed into an ec2-instance, but it
 * creating/changing/deleting any mesh policies
 * sending data to zone control planes
 * keeping an eye on all dataplanes running
+
+**Zone Services**
 
 Once, the global control plane is ready, we can deploy the Kong Mesh `Zone Control Plane`, `Zone Ingress` and `Zone Egress`. Let's discusse each of these.
 
@@ -50,9 +51,11 @@ Once, the global control plane is ready, we can deploy the Kong Mesh `Zone Contr
 
 `Zone Ingress and Egresses` have the responsiblity of proxying traffic between dataplane proxies existing in other zones. Ingress goes into local dataplane proxy of that zone. and Egress goes out its local zone to another zone or support reaching external services.
 
-Once the Zone CP, Zone Ingress and Egress are setup.
+**Dataplane Proxies**
 
-Last are the `Dataplane Proxies`. Any application that intended to be a part of a mesh requires a dataplane proxy (sidecar). In this case, the monolith and Runtime Instance were provisioned dataplanes. The dataplanes register with the zone control plane, and will connect to dataplanes running in the local zone and communicate with zones ingress/egresses to send traffic across zones.
+Once the zone is up an running dataplanes can be provisioned.
+
+Any application that intended to be a part of a mesh requires a dataplane proxy (sidecar). In this case, the monolith and Runtime Instance were provisioned dataplanes. The dataplanes register with the zone control plane, and will connect to dataplanes running in the local zone and communicate with zones ingress/egresses to send traffic across zones.
 
 That is fundamental objective of each process running in the mesh. For all these service types deployed on the VMs, `zone cp`, `zone ingress`, `zone egress`, `dataplane` these are just system processes running on the VM. We will explore this further in next section.
 
