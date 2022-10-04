@@ -163,4 +163,4 @@ Just to Recap. The objective of phase 1 was to create our on-premise environment
 
 Now that phase 1 is done, we are prepared for phase 2, where Kong Mesh will be introduced.
 
-Please Navigate to the Home Page to proceed with [Deploy Phase 2 of the Migration](../../README.mdL#116)
+Please Navigate to the Home Page to proceed with [Deploy Phase 2 of the Migration](../../README.md)
