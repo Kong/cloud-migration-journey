@@ -96,15 +96,15 @@ Now, let's navigate up to the Konnect console to review and configure the Runtim
 
 3. `Create Gateway Service` - Select the `+ New gateway service` button in the menu.
 
-4. `Add a new gateway servid` - We will configure the Gateway Service.
+4. `Add a new gateway service` - To configure the Gateway Service.
 
-    * select the `Add using Protocol,Host and Path` radio button.
+    * Select the `Add using Protocol,Host and Path` radio button.
     
     * Fill in the following information regarding how to reach the backend Monolith Application:
         * **Gateway Service Name** = Migration
         * **Protocol** = http
-        * **Protocol** = <Your Monolith IP>
-        * **Path** = /monolith/resources/ (the base url of the Monolith Web Service)
+        * **Protocol** = "<Your Monolith IP>"
+        * **Path** = /monolith/resources/ , _note: (the base url of the Monolith Web Service)_
         * **Port** = 8080
 
     * Save the Gateway Service
@@ -115,7 +115,7 @@ An example Gateway Service is depicted below.
     <img src="../img/phase_1/2_gatewayservice.png" width="500" /></div>
 </p>
 
-5. `Create Route` - Navigate into new Gateway Service &#8594; scroll down &#8594; Add Route:
+5. `Create Route` - Navigate into newly create Gateway Service `Migration` &#8594; scroll down &#8594; Add Route:
 
     * Fill in the following information regarding how to expose the Monolith through the Runtime Instance:
         * **Route Name** = OnPrem
@@ -131,9 +131,36 @@ An example Route is shown below.
     <img src="../img/phase_1/3_route.png" width="400" /></div>
 </p>
 
-And now we are ready to validate.
+And now we are ready to validate we can consume the monolith application.
 
 ### Validation
 
-For the validation, will be calling the `Route` exposed on the Runtime Instance.
+`Objective`: Call `On Prem Route` exposed on the Runtime Instance and validate all Monolith Web Services are returning. Mostly, important taking a look at the behavior of the Monolith Disputes API.
 
+`Requirement`: Insomnia
+
+1. Open Insomnia &#8594; Navigate to Dashboard &#8594; Select `Create` dropdown in the top left &#8594; Import From `+ File` &#8594; the insomnia collection is located under `migration-journey/docs/insomnia`
+
+2. Navigate into the `Migration Journey` Collection &#8594; Open `Phase 1 - OnPrem` SubFolder
+
+3. For each request hit `Send`, you will be prompted for the Runtime Instance IP (your gateway IP from the ansible inventory).
+
+**Disputes Validation**
+
+We want to take a close look at the functionality of the `Disputes` API. In the Monolith it does not offer much functionality at the moment. Take a look at the example output below:
+
+<p align="center">
+    <img src="../img/phase_1/4_insomnia_disputes.png" width="800" /></div>
+</p>
+
+This is the functionality (or the lack of) that we want to deprecate in favor for a new `Disputes Microservice` that offers more to our customers.
+
+## Closing and Recap
+
+**This is the end of Phase 1**
+
+Just to Recap. The objective of phase 1 was to create our on-premise environment, and expose our Monolith Application to world with a Konnect Runtime Instance.
+
+Now that phase 1 is done, we are prepared for phase 2, where Kong Mesh will be introduced.
+
+Please Navigate to the Home Page to proceed with [Deploy Phase 2 of the Migration](docs/README.md#116)
