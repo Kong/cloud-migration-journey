@@ -85,6 +85,53 @@ Grab the host IPs of the kuma labelled hosts, an example is below:
 
 ### Global Control Plane
 
+**Global Control Plane GUI**
+
+The GUI is available on: `http://<Global CP IP>:5681/gui`.
+
+Today the GUI behaves in `READ-ONLY` mode.
+
+The `Overview` Page is really informative. It provides the the general state of the Mesh Infrastructure: Number of Zones, Dataplanes, Deployment Strategies, License Limitations. From there you can dive into any resource configuration or services recognized as part of the mesh such as the health of Zone CP, Ingresses, and Dataplanes. 
+
+<p align="center">
+    <img src="../img/phase_2/2_global_cp_overview.png"/></div>
+</p>
+
+`Zone Sevices`
+
+For the zones, from the GUI we can see we have 1 "On-Prem" Zone, and in that Zone we have 1 Zone Ingress and 1 Zone Egress.
+
+<p align="center">
+    <img src="../img/phase_2/3_zones.png" width="1000"/></div>
+</p>
+
+
+`Dataplanes`
+
+First - You'll notice from the GUI that Dataplanes are categorized as either `Standard` or `Gateway`. The type Gateway infers that that Mesh will allow the designated service to recieve traffic outside the Mesh, which is exactly what we need for our Runtime Instance.
+
+Second - We can see what Zone the DPP is associated with within the Name of the DPP.
+
+Third - Tags are important. The tags are used to select the mesh behavior: deployment strategy for a new microservice release, load balancing, observability, any mesh functionality is backed by the tags.
+
+<p align="center">
+    <img src="../img/phase_2/4_dataplanes.png" width="1000"/></div>
+</p>
+
+`In Summary`
+
+The GUI is extremely informative on the state of all resources and services. The take away messages are the following:
+
+1. The Global Control Plane is running in Multi-Zone Mode.
+
+2. We created an "On-Prem" Zone.
+
+3. We have a Zone Ingress and Zone Egress deployed in the "On-Prem" Zone.
+
+4. We have 2 Dataplanes deployed in the "On-Prem" Zone. `Standard` Dataplane is our Monolith, `Gateway` Dataplane is our Runtime Instance.
+
+**Global Control Plane VM**
+
 SSH into the global control plane:
 
 ```console
@@ -93,11 +140,7 @@ ssh -i ~/.kmj/ec2/ec2.key ubuntu@35.85.31.178
 
 Change to root user for ease of use: `sudo su`
 
-Now we will navigate the VM and investigate the setup of the global control process (kuma-cp).
-
-**Kuma CP System Process**
-
-The kumap-cp binary is running as a SystemD process on the vm.
+Check on how the Global Control Plane Process is running:
 
 ```bash
 $ systemctl status kuma-cp
@@ -116,17 +159,7 @@ Oct 04 21:21:37 ip-10-0-0-47 systemd[1]: Started Kuma Global Control Plane.
 Oct 04 21:21:37 ip-10-0-0-47 bash[9676]: kuma-cp: logs will be stored in "/tmp/kuma-cp.log"
 ```
 
-From the SystemD output we can see that a /home/kuma directory was created to house, the binaries, license and any needed configuration.
-
-**Global Control Plane GUI**
-
-The GUI is available on: `http://<Global CP IP>:5681/gui`.
-
-Today the GUI behaves in READ-ONLY mode. In the overview panel you can get the general state of the Mesh Infrastructure: Number of Zones, Dataplanes, Deployment Strategies, License Limitations.
-
-<p align="center">
-    <img src="../img/phase_2/2_global_cp_overview.png"/></div>
-</p>
+From the SystemD output we can see that the setup for the Global Control Plane is simple. There is a /home/kuma directory and the control plane is just running as a binary `kuma-cp`.
 
 **Zone Control Plane**
 
