@@ -204,7 +204,7 @@ ExecStart = /bin/bash -c 'KUMA_MODE=zone \
 The zone ingress and egress are a bit more interesting. First for Zone Ingress we need to create a ZoneIngress Resource Type that mostly describe the networking configuration. Execute the command below to review the ingress resource instantiated in your mesh:
 
 ```console
-cat /home/kuma/dataplane-ingress.yam
+cat /home/kuma/dataplane-ingress.yaml
 ```
 
 Will output something related to the output below:
@@ -215,8 +215,8 @@ name: universal-zone-ingress-on_prem
 networking:
   address: 10.0.0.36  #address that is routable within the zone
   port: 10001 
-  advertisedAddress: 10.0.0.36 #relevant if zone ingress arise behind a load balancer
-  advertisedPort: 10001 #relevant if zones ingress is being a load balancer
+  advertisedAddress: 10.0.0.36 #relevant if zone ingress resides behind a load balancer
+  advertisedPort: 10001 #relevant if zone ingress resides behind a load balancer
   admin:
     port: 30002 
 ```
@@ -237,8 +237,99 @@ ExecStart = /usr/bin/bash -c '/home/kuma/mesh/kong-mesh-1.8.1/bin/kuma-dp \
 
 Zone Egress is pretty similar, you can navigate that yourself to review.
 
-**Dataplanes**
+**On Prem Dataplanes**
 
+Last, we want to explore the Gateway and Monolith Dataplanes.
+
+`Runtime Instance Dataplane`
+
+We will start with the Gateway Dataplane because the runtime instance and zone services are on the same VM.
+
+Take a look at the `Dataplane Manifest` for the Runtime Instance:
+
+```console
+cat cat /home/kuma/dataplane-nontransparent.yaml
+```
+
+With an output similar to below:
+
+```yaml
+type: Dataplane
+mesh: default
+name: kong
+networking:
+  address: 10.0.0.36
+  gateway:
+    type: DELEGATED
+    tags:
+      kuma.io/service: kong
+  outbound:
+    - port: 33033
+      tags: 
+        kuma.io/service: monolith-service_svc_5000
+    - port: 33034
+      tags: 
+        kuma.io/service: microservice_microservice_svc_8080
+```
+
+There are a number of interesting attributes in the manifest:
+
+1. mesh - the mesh that the dataplane should join is configurable.
+
+2. gateway - defining that the type of dataplane is a gateway. Type `delegated` means we are using an existing gateway, i.e. the runtime instance we provisioned.
+
+3. outbound - this section defines how the gateway can reach services on the mesh, and again those tags are very important. For example, all traffic going out port 33033 will go to the service labeled monolith-service_svc_5000. This section is required when universal mode dataplanes are not run with `transparent-proxy`. We will not be diving into the pros/cons of transparent proxy here but in the next exercise it will impact how the Runtime Instance is reconfigured.
+
+Then the custom systemD service looks very similar to the ingress/egress. You can read it by executing the command: `cat /etc/systemd/system/kuma-dp.service`
+
+`Monolith Dataplane`
+
+ssh into the monolith server:
+
+
+
+
+```console
+cat /home/kuma/dataplane-nontransparent.yaml
+```
+
+```yaml
+type: Dataplane
+mesh: default
+name: monolith
+networking: 
+  address: 10.0.0.55
+  inbound:
+    - port: 5000
+      servicePort: 8080
+      tags: 
+        kuma.io/service: monolith-service_svc_5000
+```
+
+Lets take a look at the differences in this `Standard` Dataplane type vs the `Gateway` type: 
+
+1. type - this manifest is still type Dataplane
+
+2. mesh - the mesh that the dp should join is still configurable.
+
+3. inbound - describe the inbound application it supports:
+    * port - The port the DP will listen on
+    * servicePort - the port the application is running on. Monolith is running on 8080 `docker ps` to double check this
+    * tags - how the monolith will be referenced by other applications in the mesh, or later used for canary deployments, zone failure among others.
+
+**Summary**
+
+We just took a deep dive on the infrastructure of Kong Mesh running in Multi-zone with a Univeral Mode Zone to manage an On Premise Environment. Wow that was alot.
+
+Let's recap what just happens:
+
+1. Global Control Plane - is running in the cloud.
+
+2. Zone Control Plane - We have 1 On-Premise Zone. It is running in Univeral Mode, and it just needs to be able to reach the Global.
+
+3. Zone Ingress and Egress - These are also running in Universal Mode, and need to register with its Zone Control Plane.
+
+4. Dataplanes - there are 2 types. Gateway --> for the Runtime Instance so we can have North/South Traffic, and Standard --> for the Monolith so it can be apart of a mesh.
 
 ## Activities - Update Mesh mTLS and Re-configure Konnect
 
