@@ -8,9 +8,7 @@ The `objective` of Phase 2 is to being the journey with Kong Mesh by exploring t
 
 The high level `activities` that will take place in this phase are:
 
-* Review Kong Mesh Global Control Plane Setup.
-
-* Review Kong Mesh Zone Services: Zone Control Plane, Zone Ingress, Zone Egress.
+* Review Kong Mesh Global Control Plane and Zone Setup.
 
 * Review the Dataplane (Sidecar Proxy) deployed beside the Monolith and Runtime Instance.
 
@@ -41,9 +39,9 @@ First Kong Mesh `Global Control Plane` was deployed into an ec2-instance, but it
 
 **Zone Services**
 
-Once, the global control plane is ready, we can deploy the Kong Mesh `Zone Control Plane`, `Zone Ingress` and `Zone Egress`. Let's discusse each of these.
+Once, the global control plane is ready, we can deploy the Kong Mesh `Zone Control Plane`, `Zone Ingress` and `Zone Egress`.
 
-`Zone Control Plane` fundamental has 2 major functions:
+`Zone Control Plane` has 2 major functions:
 
 1. `Interact with the Global Control Plane` - Register itself to the global. The global control plane will propogate all polices to the zone control plane, and vice versa send data back to the global control plane.
 
@@ -55,10 +53,80 @@ Once, the global control plane is ready, we can deploy the Kong Mesh `Zone Contr
 
 Once the zone is up an running dataplanes can be provisioned.
 
-Any application that intended to be a part of a mesh requires a dataplane proxy (sidecar). In this case, the monolith and Runtime Instance were provisioned dataplanes. The dataplanes register with the zone control plane, and will connect to dataplanes running in the local zone and communicate with zones ingress/egresses to send traffic across zones.
+Any application that intended to be a part of a mesh requires a dataplane proxy (sidecar). In this case, the monolith and Runtime Instance were provisioned dataplanes. The dataplanes register with the zone control plane, and will communicate with dataplanes running in the local zone as well as communicate with zones ingress/egresses to send traffic across zones.
 
-That is fundamental objective of each process running in the mesh. For all these service types deployed on the VMs, `zone cp`, `zone ingress`, `zone egress`, `dataplane` these are just system processes running on the VM. We will explore this further in next section.
+**Universal Mode**
+All these services were deployed as processes onto the VMs, `global control plane`, `zone cp`, `zone ingress`, `zone egress`, `dataplane`, which is referred to as Universal Mode in the Kuma Documentation. In the next section, we will explore the configuration of each component more closely.
 
 ## Explore
 
-do this, do that, look at this, look at that
+First, open the ansible inventory file
+
+```console
+cat ~/.kmj/ansible/inventory.yml
+```
+
+Grab the host IPs of the kuma labelled hosts, an example is below:
+
+```yaml
+    kuma-global-cp:
+      hosts:
+        35.85.31.178
+    kuma-zone-cp:
+      hosts:
+        18.237.252.125
+    kuma-zone-ingress:
+      hosts:
+        18.237.252.125
+    kuma-zone-egress:
+      hosts:
+        18.237.252.125
+```
+
+### Global Control Plane
+
+SSH into the global control plane:
+
+```console
+ssh -i ~/.kmj/ec2/ec2.key ubuntu@35.85.31.178
+```
+
+Change to root user for ease of use: `sudo su`
+
+Now we will navigate the VM and investigate the setup of the global control process (kuma-cp).
+
+**Kuma CP System Process**
+
+The kumap-cp binary is running as a SystemD process on the vm.
+
+```bash
+$ systemctl status kuma-cp
+
+● kuma-cp.service - Kuma Global Control Plane
+     Loaded: loaded (/etc/systemd/system/kuma-cp.service; enabled; vendor preset: enabled)
+     Active: active (running) since Tue 2022-10-04 21:21:37 UTC; 15h ago
+   Main PID: 9676 (kuma-cp)
+      Tasks: 6 (limit: 2351)
+     Memory: 31.3M
+        CPU: 2min 16.109s
+     CGroup: /system.slice/kuma-cp.service
+             └─9676 /home/kuma/mesh/kong-mesh-1.8.1/bin/kuma-cp --log-output-path=/tmp/kuma-cp.log run --license-path=/home/kuma/license.json
+
+Oct 04 21:21:37 ip-10-0-0-47 systemd[1]: Started Kuma Global Control Plane.
+Oct 04 21:21:37 ip-10-0-0-47 bash[9676]: kuma-cp: logs will be stored in "/tmp/kuma-cp.log"
+```
+
+From the SystemD output we can see that a /home/kuma directory was created to house, the binaries, license and any needed configuration.
+
+**Global Control Plane GUI**
+
+The GUI is available on: `http://<Global CP IP>:5681/gui`.
+
+Today the GUI behaves in READ-ONLY mode. In the overview panel you can get the general state of the Mesh Infrastructure: Number of Zones, Dataplanes, Deployment Strategies, License Limitations.
+
+<p align="center">
+    <img src="../img/phase_2/2_global_cp_overview.png"/></div>
+</p>
+
+**Zone Control Plane**
+
