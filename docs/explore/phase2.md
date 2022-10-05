@@ -58,7 +58,7 @@ Any application that intended to be a part of a mesh requires a dataplane proxy 
 **Universal Mode**
 All these services were deployed as processes onto the VMs, `global control plane`, `zone cp`, `zone ingress`, `zone egress`, `dataplane`, which is referred to as Universal Mode in the Kuma Documentation. In the next section, we will explore the configuration of each component more closely.
 
-## Explore
+## Explore Infrastructure
 
 First, open the ansible inventory file
 
@@ -159,7 +159,86 @@ Oct 04 21:21:37 ip-10-0-0-47 systemd[1]: Started Kuma Global Control Plane.
 Oct 04 21:21:37 ip-10-0-0-47 bash[9676]: kuma-cp: logs will be stored in "/tmp/kuma-cp.log"
 ```
 
-From the SystemD output we can see that the setup for the Global Control Plane is simple. There is a /home/kuma directory and the control plane is just running as a binary `kuma-cp`.
+In order to run the Global Control Plane, the kuma binaries were downloaded and created a systemD sevice to run the process.
 
-**Zone Control Plane**
+**On-Prem Zone Control Plane**
+
+Now we will dive into the setup of the zones services. From the ansible inventory you'll notice the Zone CP, Zone Ingress and Egress were all created on the same VM.
+
+SSH into the zone cp vm:
+
+```console
+ssh -i ~/.kmj/ec2/ec2.key ubuntu@18.237.252.125
+```
+
+`Kuma-Zone-CP`
+
+Again, the Zone is the same binary as the global, as shown below
+
+```bash
+systemctl status kuma-zone-cp
+● kuma-zone-cp.service - Kuma Zone Control Plane
+     Loaded: loaded (/etc/systemd/system/kuma-zone-cp.service; enabled; vendor preset: enabled)
+     Active: active (running) since Tue 2022-10-04 21:21:57 UTC; 17h ago
+   Main PID: 221050 (kuma-cp)
+      Tasks: 6 (limit: 2351)
+     Memory: 38.9M
+        CPU: 5min 50.429s
+     CGroup: /system.slice/kuma-zone-cp.service
+             └─221050 /home/kuma/mesh/kong-mesh-1.8.1/bin/kuma-cp --log-output-path=/tmp/kuma-cp.log run --license-path=/home/kuma/license.json
+```
+
+But to setup the Zone requires a couple of extra attributes, `KUMA_MODE`, `ZONE_NAME`, `GLOBAL_ADDRESS`: these ENVs are articulated in the systemd file:
+
+```bash
+cat /etc/systemd/system/kuma-zone-cp.service
+...
+ExecStart = /bin/bash -c 'KUMA_MODE=zone \
+  KUMA_MULTIZONE_ZONE_NAME=on_prem \
+  KUMA_MULTIZONE_ZONE_GLOBAL_ADDRESS=grpcs://35.85.31.178:5685 \
+ /home/kuma/mesh/kong-mesh-1.8.1/bin/kuma-cp --log-output-path=/tmp/kuma-cp.log run --license-path=/home/kuma/license.json'
+```
+
+`Zone Ingress`
+
+The zone ingress and egress are a bit more interesting. First for Zone Ingress we need to create a ZoneIngress Resource Type that mostly describe the networking configuration. Execute the command below to review the ingress resource instantiated in your mesh:
+
+```console
+cat /home/kuma/dataplane-ingress.yam
+```
+
+Will output something related to the output below:
+
+```yaml
+type: ZoneIngress
+name: universal-zone-ingress-on_prem
+networking:
+  address: 10.0.0.36  #address that is routable within the zone
+  port: 10001 
+  advertisedAddress: 10.0.0.36 #relevant if zone ingress arise behind a load balancer
+  advertisedPort: 10001 #relevant if zones ingress is being a load balancer
+  admin:
+    port: 30002 
+```
+
+The lastly looking at the custom systemD service that it is actually a `kuma-dp` binary, and requires knowledge of the zone cp addr to register itself, a token to validate itself as a the expected dp, and its Zone Ingress manifest.
+
+```bash
+cat /etc/systemd/system/kuma-ingress.service
+...
+
+ExecStart = /usr/bin/bash -c '/home/kuma/mesh/kong-mesh-1.8.1/bin/kuma-dp \
+    --log-output-path=/tmp/kuma-ingress.log run \
+    --cp-address=https://10.0.0.36:5678 \   
+    --dataplane-token-file=/home/kuma/ingress.token \
+    --dataplane-file=/home/kuma/dataplane-ingress.yaml \
+    --proxy-type ingress > /tmp/kuma-ingress.stdout 2> /tmp/kuma-ingress.stderr'
+```
+
+Zone Egress is pretty similar, you can navigate that yourself to review.
+
+**Dataplanes**
+
+
+## Activities - Update Mesh mTLS and Re-configure Konnect
 
