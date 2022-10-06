@@ -286,9 +286,6 @@ Then the custom systemD service looks very similar to the ingress/egress. You ca
 
 ssh into the monolith server:
 
-
-
-
 ```console
 cat /home/kuma/dataplane-nontransparent.yaml
 ```
@@ -306,7 +303,7 @@ networking:
         kuma.io/service: monolith-service_svc_5000
 ```
 
-Lets take a look at the differences in this `Standard` Dataplane type vs the `Gateway` type: 
+Lets compare this `Standard` Dataplane type to the Gateway type:
 
 1. type - this manifest is still type Dataplane
 
@@ -319,17 +316,137 @@ Lets take a look at the differences in this `Standard` Dataplane type vs the `Ga
 
 **Summary**
 
-We just took a deep dive on the infrastructure of Kong Mesh running in Multi-zone with a Univeral Mode Zone to manage an On Premise Environment. Wow that was alot.
+Wow that was alot. We just took a deep dive on the infrastructure of Kong Mesh running in Multi-zone with a Univeral Mode Zone to manage an On Premise Environment.
 
-Let's recap what just happens:
+Let's recap what just happened:
 
-1. Global Control Plane - is running in the cloud.
+1. `Global Control Plane` - is running in the cloud.
 
-2. Zone Control Plane - We have 1 On-Premise Zone. It is running in Univeral Mode, and it just needs to be able to reach the Global.
+2. `Zone Control Plane` - We have 1 On-Premise Zone. It is running in Univeral Mode, and it just needs to be able to reach the Global.
 
-3. Zone Ingress and Egress - These are also running in Universal Mode, and need to register with its Zone Control Plane.
+3. `Zone Ingress and Egress` - These are also running in Universal Mode, and need to register with its Zone Control Plane.
 
-4. Dataplanes - there are 2 types. Gateway --> for the Runtime Instance so we can have North/South Traffic, and Standard --> for the Monolith so it can be apart of a mesh.
+4. `Dataplanes` - there are 2 types. `Gateway` --> for the Runtime Instance so we can have North/South Traffic, and `Standard` --> for the Monolith so it can be apart of a mesh.
 
-## Activities - Update Mesh mTLS and Re-configure Konnect
+## Activities - Update the Mesh with mTLS and Re-configure Konnect
 
+### Update the Mesh
+
+**Why are we are we updating the Mesh** - It is important to understand that for cross zone communication to be successful, mTLS needs to be enabled, along with permitting ZoneEgress traffic.
+
+For all resources creations/updates/deletions are executed on the global control plane.
+
+SSH to the global control plane to get started and change to the root user for simplicty:
+
+```console
+ssh -i ~/.kmj/ec2/ec2.key ubuntu@35.85.31.178
+```
+
+Update the `Mesh` Manifest:
+
+```console
+/home/kuma/mesh/kong-mesh-1.8.1/bin/kumactl apply -f mesh-default.yaml
+```
+
+You can validate the changes in the Console.
+
+### Re-Configure Konnect
+
+Now our On-Prem Zone and Default Mesh are fully ready. We are going to log back into the Konnect to make the changes. YOu will need the outbound configuration from the Gateway Dataplane, so that is pasted below:
+
+```yaml
+type: Dataplane
+mesh: default
+name: kong
+networking:
+  address: 10.0.0.36
+  gateway:
+    type: DELEGATED
+    tags:
+      kuma.io/service: kong
+  outbound:
+    - port: 33033
+      tags: 
+        kuma.io/service: monolith-service_svc_5000
+    - port: 33034
+      tags: 
+        kuma.io/service: microservice_microservice_svc_8080
+```
+
+Login into Konnect and navigate back to the list of gateway services. We are going to 
+
+2.  From the Runtime Manager Page Select the appropriate `Runtime Group` where you deployed the runtime instance &#8594; in the left hand panel navigate to `Gateway Services`
+
+3. `Create Gateway Service` - Select the `+ New gateway service` button in the menu.
+
+4. `Add a new gateway service` - To configure the Gateway Service.
+
+    * Select the `Add using Protocol,Host and Path` radio button.
+    
+    * Fill in the following information regarding how to reach the backend Monolith Application:
+        * **Gateway Service Name** = Mesh
+        * **Protocol** = http
+        * **Host** = 127.0.0.1
+        * **Path** = /monolith/resources/ , _note: (the base url of the Monolith Web Service)_
+        * **Port** = 33033
+
+    * Save the Gateway Service
+
+<p align="center">
+    <img src="../img/phase_2/5_gatewayservice.png"/></div>
+</p>
+
+5. `Create Route` for the new Gateway Service- Navigate into newly create Gateway Service `Mesh` &#8594; scroll down &#8594; Add Route:
+
+    * Fill in the following information regarding how to expose the Monolith through the Runtime Instance:
+        * **Route Name** = Mesh
+        * **Protocols** = http
+        * **Method(s)** = GET
+        * **Path(s)** = /mesh
+
+    * Save the Route
+
+An example Route is shown below.
+
+<p align="center">
+    <img src="../img/phase_2/6_route.png"/></div>
+</p>
+
+With that we are ready to validate.
+
+### Validation
+
+Just to clarify what to expect - `From the perspective of the API Consumer nothing should have changed.` Onboarding and exposing the monolith through the Mesh network should have no affect to the consumer.
+An API Consumer will call the same Runtime Instance as phase 1 and expect the same responses.
+
+`Requirement`: Insomnia
+
+1. Navigate into the `Migration Journey` Collection &#8594; Open `Phase 1 - Mesh` SubFolder
+
+2. For each request hit `Send`, you will be prompted for the Runtime Instance IP (your gateway IP from the ansible inventory).
+
+You will again see nothing has changed from the client's perspective.
+
+## Closing and Recap
+
+**This is the end of Phase 2**
+
+Just to Recap.
+
+The `objective of phase 2` was create an On Prem Mesh Zone, onboard the Monolith and Runtime Instance to the Mesh, and reconfigure the Gateway so traffic flows over the Mesh.
+
+We review through:
+
+* The installation of Kong Mesh in `Universal Mode` for the Global Control Plane, Zone Control Plane, Zone Ingresses, Zone Egresses, and Dataplanes.
+
+* The difference between `Gateway` and `Standard` Dataplanes.
+
+* Re-configured Konnect to have traffic flow through the mesh.
+
+* Validate we can still successfull call the monolith, no changes, and still no microservice.
+
+Because we are in non-transparent proxy mode we wrote a new gateway service that called: http://127.0.0.1:33033, which are the outbounds defined in the Dataplane Manifest for the Gateway.
+
+Now that phase 2 is done, we are prepared for phase 3, where we will introduce the Cloud Zone to the Mesh, and execute the cutover of the Disputes from the Monolith to the new Microservice running in Amazon EKS.
+
+Please Navigate to the Home Page to proceed with [Deploy Phase 3 of the Migration](../../README.md)
