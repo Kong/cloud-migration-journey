@@ -4,7 +4,7 @@
   <img src="https://2tjosk2rxzc21medji3nfn1g-wpengine.netdna-ssl.com/wp-content/uploads/2018/08/kong-combination-mark-color-256px.png" /></div>
 </p>
 
-**Learn how how Konnect and Kong Mesh can be leveraged to de-risk and lift-and-shift connections during a migration to the cloud.**
+**Learn how Konnect and Kong Mesh can be leveraged to de-risk and lift-and-shift connections during a migration to the cloud.**
 
 ## Table of Contents
 

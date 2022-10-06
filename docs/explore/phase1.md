@@ -103,7 +103,7 @@ Now, let's navigate up to the Konnect console to review and configure the Runtim
     * Fill in the following information regarding how to reach the backend Monolith Application:
         * **Gateway Service Name** = Migration
         * **Protocol** = http
-        * **Protocol** = "<Your Monolith IP>"
+        * **Host** = "<Your Monolith IP>"
         * **Path** = /monolith/resources/ , _note: (the base url of the Monolith Web Service)_
         * **Port** = 8080
 
