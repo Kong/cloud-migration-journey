@@ -445,7 +445,7 @@ We review through:
 
 * Validate we can still successfull call the monolith, no changes, and still no microservice.
 
-Because we are in non-transparent proxy mode we wrote a new gateway service that called: http://127.0.0.1:33033, which are the outbounds defined in the Dataplane Manifest for the Gateway.
+Because we are in non-transparent proxy mode we wrote a new gateway service that called: http://127.0.0.1:33033, which is the outbound defined in the Dataplane Manifest of the Gateway, that will direct traffic to the monolith.
 
 Now that phase 2 is done, we are prepared for phase 3, where we will introduce the Cloud Zone to the Mesh, and execute the cutover of the Disputes from the Monolith to the new Microservice running in Amazon EKS.
 
