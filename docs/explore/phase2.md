@@ -425,7 +425,7 @@ An API Consumer will call the same Runtime Instance as phase 1 and expect the sa
 
 2. For each request hit `Send`, you will be prompted for the Runtime Instance IP (your gateway IP from the ansible inventory).
 
-You will again see nothing has changed from the client's perspective.
+You will see nothing has changed from the client's perspective. Which is the expectation!
 
 ## Closing and Recap
 
