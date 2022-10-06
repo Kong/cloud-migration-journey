@@ -435,7 +435,7 @@ Just to Recap.
 
 The `objective of phase 2` was create an On Prem Mesh Zone, onboard the Monolith and Runtime Instance to the Mesh, and reconfigure the Gateway so traffic flows over the Mesh.
 
-We review through:
+We reviewed through:
 
 * The installation of Kong Mesh in `Universal Mode` for the Global Control Plane, Zone Control Plane, Zone Ingresses, Zone Egresses, and Dataplanes.
 
