@@ -52,7 +52,7 @@ users:
 - name: aws
   user:
     exec:
-      apiVersion: client.authentication.k8s.io/v1alpha1
+      apiVersion: client.authentication.k8s.io/v1beta1
       command: aws-iam-authenticator
       args:
         - "token"
@@ -255,6 +255,7 @@ resource "local_file" "public_key" {
 resource "local_file" "kubeconfig" {
   content  = "${local.kubeconfig}"
   filename = "out/kube/kubeconfig"
+  file_permission = "0600"
 }
 
 resource "local_file" "inventory" {
