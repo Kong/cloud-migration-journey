@@ -29,7 +29,13 @@ zones:
       install: true
       host: 54.193.67.206
       dp_addr: 10.0.0.7
-  
+    db:
+      name: kongmesh
+      host: terraform-2022101012462445890000000b.cuomwl2bypzp.us-west-2.rds.amazonaws.com
+      port: 5432
+      user: kongmesh
+      pass: kongmesh
+
 dataplanes:
   - name: "gateway"
     dp_type: "gateway"

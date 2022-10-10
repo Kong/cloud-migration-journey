@@ -7,6 +7,12 @@ User=root
 ExecStart = /bin/bash -c 'KUMA_MODE=zone \
   KUMA_MULTIZONE_ZONE_NAME={{ zone_name }} \
   KUMA_MULTIZONE_ZONE_GLOBAL_ADDRESS=grpcs://{{ global_hostname }}:5685 \
+  KUMA_STORE_TYPE=postgres \
+  KUMA_STORE_POSTGRES_HOST={{ postgres_hostname }} \
+  KUMA_STORE_POSTGRES_PORT={{ postgres_port }} \
+  KUMA_STORE_POSTGRES_USER={{ postgres_user }} \
+  KUMA_STORE_POSTGRES_PASSWORD={{ postgres_password }} \
+  KUMA_STORE_POSTGRES_DB_NAME={{ postgres_db_name }} \
  /home/kuma/mesh/kong-mesh-1.8.1/bin/kuma-cp --log-output-path=/tmp/kuma-cp.log run --license-path=/home/kuma/license.json'
 
 [Install]

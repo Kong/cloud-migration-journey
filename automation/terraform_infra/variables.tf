@@ -20,7 +20,6 @@ variable "vpc_cidr" {
   default = "10.0.0.0/23"
 }
 
-
 variable "onprem_subnets" {
   type = list(object({
     name   = string,
@@ -85,6 +84,6 @@ variable "kong_mesh_version" {
 }
 
 variable "kong_license_path" {
-  type = string 
+  type        = string
   description = "path to the kong mesh license"
 }

@@ -20,7 +20,7 @@ provider "aws" {
   default_tags {
     tags = {
       Project = "kong-migration-journey"
-      who = var.me
+      who     = var.me
     }
   }
 }
@@ -30,6 +30,12 @@ provider "local" {}
 
 locals {
   cluster_name = "${var.me}-kong-mesh-cloud"
+  db = {
+    name     = "kongmesh"
+    username = "kongmesh"
+    password = "kongmesh"
+  }
+
   kubeconfig = <<KUBECONFIG
 
 
@@ -182,17 +188,17 @@ resource "aws_key_pair" "key_pair" {
 
 data "aws_ami" "image" {
 
-    most_recent = true
-    owners = ["099720109477"] # Canonical
-    filter {
-        name   = "name"
-        values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
-    }
+  most_recent = true
+  owners      = ["099720109477"] # Canonical
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
 
-    filter {
-        name   = "virtualization-type"
-        values = ["hvm"]
-    }    
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
 }
 
 
@@ -230,9 +236,9 @@ resource "aws_db_instance" "main" {
   allocated_storage   = 20
   engine              = "postgres"
   instance_class      = "db.t3.micro"
-  db_name             = "kongmesh"
-  username            = "kongmesh"
-  password            = "kongmesh"
+  db_name             = local.db.name
+  username            = local.db.username
+  password            = local.db.password
   skip_final_snapshot = true
 
   db_subnet_group_name   = aws_db_subnet_group.main.id
@@ -253,35 +259,37 @@ resource "local_file" "public_key" {
 }
 
 resource "local_file" "kubeconfig" {
-  content  = "${local.kubeconfig}"
-  filename = "out/kube/kubeconfig"
+  content         = local.kubeconfig
+  filename        = "out/kube/kubeconfig"
   file_permission = "0600"
 }
 
 resource "local_file" "inventory" {
-  content  = templatefile("inventory.yml.tpl", {
-    global_cp_node = aws_instance.node["kuma-global-cp"], 
-    zone_node = aws_instance.node["runtime-instance"],
-    gateway_node = aws_instance.node["runtime-instance"],
-    monolith_node = aws_instance.node["monolith"]
+  content = templatefile("inventory.yml.tpl", {
+    global_cp_node = aws_instance.node["kuma-global-cp"],
+    zone_node      = aws_instance.node["runtime-instance"],
+    gateway_node   = aws_instance.node["runtime-instance"],
+    monolith_node  = aws_instance.node["monolith"]
   })
   filename = "out/ansible/inventory.yml"
 }
 
 resource "local_file" "kuma" {
- content  = templatefile("kuma.yml.tpl", { 
-   kong_mesh_version = var.kong_mesh_version,
-   kong_license_path = var.kong_license_path,
-   kubeconfig_path = "out/kube/kubeconfig",
-   konnect_pass = var.konnect_pass,
-   konnect_user = var.konnect_user,
-   konnect_controlPlane = var.konnect_instance_id,
-   global_cp_node = aws_instance.node["kuma-global-cp"], 
-   zone_node = aws_instance.node["runtime-instance"],
-   gateway_node = aws_instance.node["runtime-instance"],
-   monolith_node = aws_instance.node["monolith"]
- })
- filename = "out/ansible/kuma.yml"
+  content = templatefile("kuma.yml.tpl", {
+    kong_mesh_version    = var.kong_mesh_version,
+    kong_license_path    = var.kong_license_path,
+    kubeconfig_path      = "out/kube/kubeconfig",
+    konnect_pass         = var.konnect_pass,
+    konnect_user         = var.konnect_user,
+    konnect_controlPlane = var.konnect_instance_id,
+    global_cp_node       = aws_instance.node["kuma-global-cp"],
+    zone_node            = aws_instance.node["runtime-instance"],
+    gateway_node         = aws_instance.node["runtime-instance"],
+    monolith_node        = aws_instance.node["monolith"],
+    db_locals            = local.db,
+    db_instance          = aws_db_instance.main
+  })
+  filename = "out/ansible/kuma.yml"
 }
 
 output "cluster_id" {
