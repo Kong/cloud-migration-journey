@@ -24,6 +24,16 @@
       kmesh_license_path: "{{ license_path }}"
       sysd_service: "{{ global_cp_service }}"
     when: inventory_hostname in groups["kuma-global-cp"]
+
+  - name: Push Mesh-Policies to Kong Mesh Global CP
+    ansible.builtin.copy:
+      src: mesh-policies/
+      dest: /home/kuma/mesh-policies/
+      owner: kuma
+      group: kuma
+      mode: u=rw,g=r,o=r
+    become: yes
+    when: inventory_hostname in groups["kuma-global-cp"]
   
   - name: Install Universal Zone CP
     ansible.builtin.include_tasks: 
