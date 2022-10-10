@@ -30,7 +30,7 @@ zones:
       host: ${ db_instance.address }
       port: ${ db_instance.port }
       user: ${ db_locals.username }
-      password: ${ db_locals.password }
+      pass: ${ db_locals.password }
 
 dataplanes:
   - name: "kong"
