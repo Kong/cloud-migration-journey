@@ -25,6 +25,12 @@ zones:
       install: true
       host: ${zone_node.public_ip}
       dp_addr: ${zone_node.private_ip}
+    db:
+      name: ${ db_locals.name }
+      host: ${ db_instance.address }
+      port: ${ db_instance.port }
+      user: ${ db_locals.username }
+      password: ${ db_locals.password }
 
 dataplanes:
   - name: "kong"
