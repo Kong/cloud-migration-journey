@@ -120,6 +120,9 @@
       docker run -d --name kong-dp --network host \
         -e "KONG_ROLE=data_plane" \
         -e "KONG_DATABASE=off" \
+        -e "KONG_KONNECT_MODE=on" \
+        -e "KONG_VITALS=off" \
+        -e "KONG_NGINX_WORKER_PROCESSES=1" \
         -e "KONG_CLUSTER_MTLS=pki" \
         -e "KONG_CLUSTER_CONTROL_PLANE={{ konnect_cp_endpoint }}:443" \
         -e "KONG_CLUSTER_SERVER_NAME={{ konnect_cp_endpoint }}" \
@@ -127,10 +130,11 @@
         -e "KONG_CLUSTER_TELEMETRY_SERVER_NAME={{ konnect_tp_endpoint }}" \
         -e "KONG_CLUSTER_CERT=/config/cluster.crt" \
         -e "KONG_CLUSTER_CERT_KEY=/config/cluster.key" \
-        -e "KONG_LUA_SSL_TRUSTED_CERTIFICATE=system" \
+        -e "KONG_LUA_SSL_TRUSTED_CERTIFICATE=system,/config/cluster.crt" \
         --mount type=bind,source="$(pwd)",target=/config,readonly \
         -p 8000:8000 \
-        kong/kong-gateway:2.8.1.2
+        -p 8443:8443 \
+        kong/kong-gateway:3.0.0.0
   args:
     chdir: "{{ ri_path }}"
   vars: 
