@@ -13,7 +13,7 @@ ExecStart = /bin/bash -c 'KUMA_MODE=zone \
   KUMA_STORE_POSTGRES_USER={{ postgres_user }} \
   KUMA_STORE_POSTGRES_PASSWORD={{ postgres_password }} \
   KUMA_STORE_POSTGRES_DB_NAME={{ postgres_db_name }} \
- /home/kuma/mesh/kong-mesh-1.8.1/bin/kuma-cp --log-output-path=/tmp/kuma-cp.log run --license-path=/home/kuma/license.json'
+ /home/kuma/mesh/kong-mesh-{{ km_version }}/bin/kuma-cp --log-output-path=/tmp/kuma-cp.log run --license-path=/home/kuma/license.json'
 
 [Install]
 WantedBy = multi-user.target

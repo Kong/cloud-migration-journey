@@ -23,6 +23,7 @@
     vars:
       kmesh_license_path: "{{ license_path }}"
       sysd_service: "{{ global_cp_service }}"
+      km_version: "{{ kong_mesh_version }}"
     when: inventory_hostname in groups["kuma-global-cp"]
 
   - name: Push Mesh-Policies to Kong Mesh Global CP
@@ -40,7 +41,7 @@
       file: tasks/mesh/mesh-universal-zone-cp.yaml
     vars:
       sysd_service: "{{ zone_cp_service }}" 
-      kong_version: "{{ kong_mesh_version }}"
+      km_version: "{{ kong_mesh_version }}"
       kmesh_license_path: "{{ license_path }}"
       zone: "{{ zones | selectattr('type', 'eq', 'universal')  | selectattr('host', 'eq', inventory_hostname) | first }}"
     when: inventory_hostname in groups["kuma-zone-cp"]
@@ -52,6 +53,7 @@
     vars:
       zone: "{{ zones | selectattr('type', 'eq', 'universal')  | selectattr('host', 'eq', inventory_hostname) | first }}"
       sysd_service: "{{ ingress_service }}"
+      km_version: "{{ kong_mesh_version }}"
     when: inventory_hostname in groups["kuma-zone-ingress"]
   
   - name: Install Universal Egress
@@ -60,6 +62,7 @@
     vars:
       zone: "{{ zones | selectattr('type', 'eq', 'universal')  | selectattr('host', 'eq', inventory_hostname) | first }}"
       sysd_service: "{{ egress_service }}"
+      km_version: "{{ kong_mesh_version }}"
     when: inventory_hostname in groups["kuma-zone-ingress"]
 
   - name: Install Universal Kong Gateway Dataplane
@@ -68,6 +71,7 @@
     vars: 
       dataplane: "{{ dataplanes | selectattr('dp_type', 'eq', 'gateway') | first }}"
       sysd_service: "{{ dp_service }}"
+      km_version: "{{ kong_mesh_version }}"
     when: inventory_hostname in groups["gateway"]
   
   - name: Install Universal Monolith Dataplane
@@ -76,4 +80,5 @@
     vars: 
       dataplane: "{{ dataplanes | selectattr('name', 'eq', 'monolith') | first }}"
       sysd_service: "{{ dp_service }}"
+      km_version: "{{ kong_mesh_version }}"
     when: inventory_hostname in groups["monolith"]

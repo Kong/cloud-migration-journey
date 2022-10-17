@@ -16,13 +16,12 @@
       vars: 
         global_hostname: "{{ global_cp_addr }}"
         zone_name: "{{ zone['name'] }}"
-        kong_version: "{{ kong_version }}"
       
     - name: Deploy Kong-Mesh Chart
       kubernetes.core.helm:
         name: "kong-mesh"
         chart_ref: "kong-mesh/kong-mesh"
-        chart_version: "{{ kong_version }}"
+        chart_version: "{{ km_version }}"
         release_namespace: "kong-mesh-system"
         release_name: "kong-mesh"
         release_state: present
@@ -30,7 +29,6 @@
           - "vars/helm/values-kong-mesh-zone-{{zone['name']}}.yaml"
         create_namespace: true
         kubeconfig: "{{ zone['kube_config'] }}"
-        # context: "{{ zone['cluster_context'] }}"
         wait: true 
       register: helm_command
     

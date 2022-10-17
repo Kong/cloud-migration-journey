@@ -4,7 +4,7 @@
 - name: Install Global Control Plane
   block:
     - name: Copy Kuma-CP Service
-      ansible.builtin.copy:
+      ansible.builtin.template:
         src: "{{playbook_dir}}/templates/{{ sysd_service }}"
         dest: "/etc/systemd/system/{{ sysd_service }}"
 

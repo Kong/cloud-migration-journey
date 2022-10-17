@@ -14,7 +14,7 @@
       ansible.builtin.include_tasks: 
         file: tasks/mesh/mesh-k8s.yaml
       vars:
-        kong_version: "{{ kong_mesh_version }}"
+        km_version: "{{ kong_mesh_version }}"
         zone: "{{ item }}"
       loop: "{{ zones | selectattr('type', 'eq', 'k8s') | list }}"
   

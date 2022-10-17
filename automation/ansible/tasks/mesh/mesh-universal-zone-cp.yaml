@@ -5,7 +5,7 @@
 
 - name: Migrate Postgres DB
   ansible.builtin.shell:
-    cmd: /home/kuma/mesh/kong-mesh-1.8.1/bin/kuma-cp migrate up
+    cmd: /home/kuma/mesh/kong-mesh-{{ km_version }}/bin/kuma-cp migrate up
   environment:
     KUMA_STORE_TYPE: postgres 
     KUMA_STORE_POSTGRES_HOST:  '{{ zone.db.host }}'

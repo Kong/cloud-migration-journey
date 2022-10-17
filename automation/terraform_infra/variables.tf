@@ -56,7 +56,7 @@ variable "eks" {
 variable "me" {
   type        = string
   description = "auto personalization of kong migration journey demo environment infrastructure"
-  default     = ""
+  default     = "me"
 }
 
 variable "konnect_pass" {
