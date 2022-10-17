@@ -148,21 +148,27 @@ kong.phase3:
 #!! infra.destroy: Destroys all of your Kong Migration Journey demo infrastructure.
 infra.destroy:
 	@clear
-	@echo "Unistalling the Helm Chart"
-	@ME=`whoami` && \
-	docker run \
+	@echo "Destroying your Kong Migration Journey demo infrastructure..."
+	@echo "This will take some time: estimate 10-15min..."
+	@- docker run \
 		--rm \
 		-v $(HOME)/.$(CONFIG_NAME):/$(CONFIG_NAME)/out \
 		-v $(AWS_CREDS_PATH):/root/.aws/credentials \
 		--entrypoint=/bin/helm \
 		--name=$(IMAGE_BASE_NAME)-helm-destroy \
 		$(IMAGE_BASE_NAME)-ansible:latest \
-		uninstall kong-mesh --namespace=kong-mesh-system --kubeconfig=/$(CONFIG_NAME)/out/kube/kubeconfig
-	@echo "Done!"
-	@echo "Destroying your Kong Migration Journey demo infrastructure..."
-	@echo "This will take some time: estimate 10-15min..."
-	@ME=`whoami` && \
-	docker run \
+		status kong-mesh --namespace=kong-mesh-system --kubeconfig=/$(CONFIG_NAME)/out/kube/kubeconfig > /dev/null 2>&1; \
+	if [ $$? != 1 ]; then \
+		docker run \
+			--rm \
+			-v $(HOME)/.$(CONFIG_NAME):/$(CONFIG_NAME)/out \
+			-v $(AWS_CREDS_PATH):/root/.aws/credentials \
+			--entrypoint=/bin/helm \
+			--name=$(IMAGE_BASE_NAME)-helm-destroy \
+			$(IMAGE_BASE_NAME)-ansible:latest \
+			uninstall kong-mesh --namespace=kong-mesh-system --kubeconfig=/$(CONFIG_NAME)/out/kube/kubeconfig; \
+	fi 
+	@- docker run \
 		--rm \
 		-v $(HOME)/.$(CONFIG_NAME):/$(CONFIG_NAME)/out \
 		-v $(AWS_CREDS_PATH):/root/.aws/credentials \
@@ -174,18 +180,4 @@ infra.destroy:
 			-auto-approve \
 			> $(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log 2>&1;
 	@echo "Done!"
-	@printf "\n\nReview the logs at:\n$(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log\n"
-
-helm.destroy:
-	@clear
-	@echo "Destroying the Cloud Zone"
-	@ME=`whoami` && \
-	docker run \
-		--rm \
-		-v $(HOME)/.$(CONFIG_NAME):/$(CONFIG_NAME)/out \
-		-v $(AWS_CREDS_PATH):/root/.aws/credentials \
-		--entrypoint=/bin/helm \
-		--name=$(IMAGE_BASE_NAME)-helm-destroy \
-		$(IMAGE_BASE_NAME)-ansible:latest \
-		uninstall kong-mesh --namespace=kong-mesh-system --kubeconfig=/$(CONFIG_NAME)/out/kube/kubeconfig
-
+ 	@printf "\n\nReview the logs at:\n$(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log\n"
