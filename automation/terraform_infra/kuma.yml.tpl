@@ -11,7 +11,6 @@ zones:
   - name: "cloud"
     type: "k8s"
     kube_config: "${kubeconfig_path}"
-    chart_version: 1.8.2
   - name: "on_prem"
     type: "universal"
     host: ${zone_node.public_ip}

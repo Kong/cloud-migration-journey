@@ -1,6 +1,7 @@
 # Kong Migration Journey configuration file
 #Kong Mesh License
 kong_license_path = "<add-kong-license-path>"
+kong_mesh_version = "1.8.1"
 
 # Kong Konnect Settings
 konnect_instance_id = "<replace-me>"

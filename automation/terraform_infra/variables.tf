@@ -56,7 +56,7 @@ variable "eks" {
 variable "me" {
   type        = string
   description = "auto personalization of kong migration journey demo environment infrastructure"
-  default     = ""
+  default     = "me"
 }
 
 variable "konnect_pass" {
@@ -86,4 +86,5 @@ variable "kong_mesh_version" {
 variable "kong_license_path" {
   type        = string
   description = "path to the kong mesh license"
+  default = ""
 }
