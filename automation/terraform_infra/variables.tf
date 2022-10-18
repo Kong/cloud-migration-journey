@@ -86,4 +86,5 @@ variable "kong_mesh_version" {
 variable "kong_license_path" {
   type        = string
   description = "path to the kong mesh license"
+  default = ""
 }

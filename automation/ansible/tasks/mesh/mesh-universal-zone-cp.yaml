@@ -37,7 +37,8 @@
         owner: kuma 
         group: kuma 
         mode: '0644'
-
+      when: kmesh_license_path != ""
+      
     - name: Systemd Tasks
       ansible.builtin.include_role: 
         name: systemd
