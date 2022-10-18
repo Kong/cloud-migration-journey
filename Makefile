@@ -69,10 +69,14 @@ prep:
 		printf "Default terraform customization variables exist, not copying...\n"; \
 	fi
 	@printf "\nDone!\n\nCustomizing your Kong Migration Journey configuration...\n"
-	@echo "First: Please Provide the Path to your Kong License: "; read KONG_LICENSE; \
-		cp $$KONG_LICENSE $(HOME)/.$(CONFIG_NAME)/kong/; \
-		file=$$(basename $$KONG_LICENSE); \
-		sed -i '' "s~<add-kong-license-path>~out/kong/$$file~g" $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS); 
+	@echo "First: Please Provide the Path to your Kong License. If no license please leave it blank"; read KONG_LICENSE; \
+		if [ ! -z "$$KONG_LICENSE" ]; then \
+			cp $$KONG_LICENSE $(HOME)/.$(CONFIG_NAME)/kong/; \
+			file=$$(basename $$KONG_LICENSE); \
+			sed -i '' "s~<add-kong-license-path>~out/kong/$$file~g" $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS); \
+		else \
+			sed -i '' "s~<add-kong-license-path>~~g" $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS); \
+		fi 
 	@printf "\n\Done, Second: Customize the the Kong Migration Journey configuration"
 	@$(KMJ_EDITOR) $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)
 	@printf "\nDone!\n\n"
@@ -178,6 +182,5 @@ infra.destroy:
 		destroy -state=/$(CONFIG_NAME)/out/tf/terraform.tfstate \
 			-var-file="/root/$(TF_VARS)"\
 			-auto-approve \
-			> $(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log 2>&1;
-	@echo "Done!"
- 	@printf "\n\nReview the logs at:\n$(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log\n"
+			> $(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log 2>&1; 
+	@printf "\nDone!\n\n Review the logs at:\n$(HOME)/.$(CONFIG_NAME)/logs/infra.destroy.log\n";
