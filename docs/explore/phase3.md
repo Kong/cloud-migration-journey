@@ -170,4 +170,3 @@ Essentially, we what we did was created distributed mesh network that supported 
 **We hope you have learned and are inspired to go forth with Kong Mesh**
 
 If you would like to tear down the infrastructure, navigate back to the [Clean Up section Home Page](../../README.md#cleanup).
-

@@ -1,4 +1,4 @@
-# Kong Migration Journey Demo
+# Cloud Migration Journey Demo
 
 <p align="center">
   <img src="https://2tjosk2rxzc21medji3nfn1g-wpengine.netdna-ssl.com/wp-content/uploads/2018/08/kong-combination-mark-color-256px.png" /></div>
@@ -14,25 +14,28 @@
 <!-- code_chunk_output -->
 
 1. [Table of Contents](#table-of-contents)
-2. [Description and purpose](#description-and-purpose)
-    1. [Migration Journey Phases](#migration-journey-phases)
+2. [Description and purpose](#cloud-migration-journey-overview)
+    1. [Migration Journey Phases](#phases)
 3. [Using this repository](#using-this-repository)
     1. [Prerequisites](#prerequisites)
     2. [Getting Started](#getting-started)
-    3. [Cleanup](#cleanup)
+    3. [Tutorial](#tutorial)
+    4. [Cleanup](#cleanup)
 4. [License](#license)
 
 <!-- /code_chunk_output -->
 
-## Migration Journey Overview
+## Cloud Migration Journey Overview
 
-You will step through a 3-phased approach to deprecrate a monolith, running on premise, for a new microservice running a Kuberentes cluster leveraging both Konnect and Kong Mesh to support the migration.
+You will step through a 3-phased approach to migration and modernization together. In this tutorial we will deprecrate a monolith, running on premise, for a new microservice running a Kuberentes cluster leveraging both Konnect and Kong Mesh to support the effort.
 
 ### Monolith to Microservice
 
 The Monolith is a Java Based Application Server that contains 4 features: Card, Balances/Charges, Payments, and Disputes. The Disputes functionality of the monolith will be deprecated for a new disputes microservice.
 
-TODO - insert image.
+<p align="center">
+    <img src="docs/img/monolith-microservice.png" width="700"/></div>
+</p>
 
 ### Phases
 
@@ -57,7 +60,7 @@ The following is required to use this demo repository:
 1. A [Kong Konnect](https://cloud.konghq.com/login) account and Runtime Group ID
     * Credentials - email and password
     * Control Plane instance ID - this is described in more detail in the Kong Konnect documentation [Set up a Runtime](https://docs.konghq.com/konnect/getting-started/configure-runtime/#set-up-a-new-runtime-instance)
-1. A Kong Enterprise license
+1. A Kong Enterprise license - optional.
 1. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 1. [Docker](https://docs.docker.com/engine/install/) or [Docker Desktop](https://docs.docker.com/engine/install/#desktop)
 1. [Insomnia](https://insomnia.rest/download)
@@ -80,58 +83,98 @@ Once the prerequisites have been met, you can start using this project. One each
 
 From your shell:
 
-1. Clone the repo to your computer:
-    > `git clone git@github.com:Kong/migration-journey.git`
+#### Step 1 - Clone the Demo from GitHub
 
-1. Change directory to your cloned repo from the previous step:
-     > `cd migration-journey`
+Clone the repo to your computer:
 
-1. View the available `make` targets for the project:
-    > `make`
+```sh
+git clone git@github.com:Kong/migration-journey.git
+```
 
-1. Build the utility containers required to run the demo:
-    > `make build`
+Change directory to your cloned repo from the previous step:
 
-1. Prepare your computer to run the demo:
-    > `make prep`
+```sh
+cd migration-journey
+```
 
-    This will create a `.kmj` directory in your `$HOME`, and prompt for various inputs:
-    1. AWS CLI credentials are configured  
-    2. The path to the kong license
-    3. Open the Kong Migration Journey configuration file (users.tfvars) where you populate the Kong Konnect information, and can make any changes to your AWS infrastructure settings (AWS Region, VPC, Subnets).
+View the available `make` targets for the project:
 
-1. Deploy the cloud infrastructure:
-    > `make infra.deploy`
+```sh
+make
+```
 
-    This will create all the required AWS infrastructure, as well as generate an Ansible inventory file and other variables files for the demo in your `~/.kmj` directory (created by `make prep`).  It will also generate the `kubeconfig`, and EC2 keys for accessing your cloud infrastructure.  
-    > **NOTE:** It is extremely important that you do not remove your `~/.kmj` directory, or any of its contents at this point.  You will have a hard time cleaning up later.
+#### Step 2 - Build the utility containers required to run the demo
 
-    [Explore: infrastructure deployment](docs/explore/infra_deploy.md).
+```sh
+make build
+```
 
-1. Deploy the Kong Migration Journey phase 1:
-    > `make kong.phase1`
+#### Step 3 - Prep Your Computer to Run the Demo
 
-    Please Navigate to [Explore: Phase 1](docs/explore/phase1.md) for the tutorial.
+```sh
+make prep
+```
 
-1. Deploy the Kong Migration Journey phase 2:
-    > `make kong.phase2`
+This will create a `.kmj` directory in your `$HOME`, and prompt for various inputs:
 
-    Please Navigate to [Explore: Phase 2](docs/explore/phase2.md) for the tutorial.
+1. AWS CLI credentials are configured  
+2. The path to the kong license
+3. Open the Kong Migration Journey configuration file (users.tfvars) where you populate the Kong Konnect information, and can make any changes to your AWS infrastructure settings (AWS Region, VPC, Subnets).
 
-1. Deploy the Kong Migration Journey phase 3:
-    > `make kong.phase3`
+#### Step 4 - Deploy the cloud infrastructure
 
-    Please Navigate to [Explore: Phase 3](docs/explore/phase3.md) for the tutorial.
+```sh
+make infra.deploy
+```
+
+This will create all the required AWS infrastructure, as well as generate an Ansible inventory file and other variables files for the demo in your `~/.kmj` directory (created by `make prep`).  It will also generate the `kubeconfig`, and EC2 keys for accessing your cloud infrastructure.  
+> **NOTE:** It is extremely important that you do not remove your `~/.kmj` directory, or any of its contents at this point.  You will have a hard time cleaning up later.
+
+[Explore: infrastructure deployment](docs/explore/infra_deploy.md).
+
+### Tutorial
+
+With the infrastructure successfully deployed, you are ready to start the tutorials. In each phase, first execute the make command that will install the Konnect and Kong Mesh Services in your AWS infrastructure, then proceed to the tutorial.
+
+#### Step 5 - Execute the Cloud Migration Journey Phase 1
+
+```sh
+make kong.phase1
+```
+
+Navigate to the tutorial [Explore: Phase 1](docs/explore/phase1.md).
+
+#### Step 6 - Execute the Cloud Migration Journey phase 2
+
+```sh
+make kong.phase2
+```
+
+Navigate to the tutorial [Explore: Phase 2](docs/explore/phase2.md).
+
+#### Step 7 - Execute the Cloud Migration Journey phase 3
+
+```sh
+make kong.phase3
+```
+
+Navigate to the tutorial [Explore: Phase 3](docs/explore/phase3.md).
 
 ### Cleanup
 
-1. Remove the cloud infrastructure and everything on it:
-    > `make infra.destroy`
+Remove the cloud infrastructure and everything on it:
 
-    This will remove everything that was created in AWS, along with your EC2 keys, kubeconfig, Ansible inventory, and variables.  Once this process has completed successfully, you can comfortably remove your configuration directory if desired, or retain it to run the demo again later:
-    
-    > `rm -rf ~/.kmj`
+```sh
+make infra.destroy
+```
 
+The above command will remove everything that was created in AWS, along with your EC2 keys, kubeconfig, Ansible inventory, and variables.  
+
+Once the above process has completed successfully, you can comfortably remove your configuration directory if desired, or retain it to run the demo again later:
+
+```sh
+rm -rf ~/.kmj
+```
 
 ## License
 
