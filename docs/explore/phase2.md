@@ -449,4 +449,4 @@ Because we are in non-transparent proxy mode we wrote a new gateway service that
 
 Now that phase 2 is done, we are prepared for phase 3, where we will introduce the Cloud Zone to the Mesh, and execute the cutover of the Disputes from the Monolith to the new Microservice running in Amazon EKS.
 
-Please Navigate to the Home Page to proceed with [Deploy Phase 3 of the Migration](../../README.md#step-7---execute-the-cloud-migration-journey-phase-3)
+Please Navigate to the Home Page to proceed with [Deploy Phase 3 of the Migration](../../README.md#step-7---execute-the-cloud-migration-journey-phase-3).

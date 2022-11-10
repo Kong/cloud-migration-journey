@@ -20,3 +20,9 @@
       container_name: monolith
       image_tag: "{{ monolith_image_tag }}"
     when: inventory_hostname in groups["monolith"]
+  
+  - ansible.builtin.debug:
+      msg: "{{ hostvars[inventory_hostname].group_names[0] }} IP: {{ ansible_ssh_host }}"
+    loop: "{{ groups['all'] }}"
+    run_once: True
+    delegate_to: localhost
