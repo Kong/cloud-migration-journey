@@ -38,8 +38,6 @@ The objective of this guide is to provide a self-paced demonstration of how the 
 
 To demonstrate this we will step through the 3-phased approach that will deprecate the `disputes` feature of monolith running on premise, for a new microservice running a Kuberentes cluster.
 
-The Monolith is a Java Based Application Server that contains 4 features: Card, Balances/Charges, Payments, and Disputes. We will specifically deprecate the `Disputes` functionality in the monolith for a new disputes microservice deployed in EKS.
-
 <p align="center">
     <img src="docs/img/monolith-microservice.png" width="600"/></div>
 </p>
@@ -58,7 +56,12 @@ Each phase has explicit technical objectives, and will build upon the previous.
 
 ## Using this Repository
 
-This repository uses a `Makefile` as the main entry-point for the demo.  We are using `AWS` for our demo infrastructure, `Terraform` to deploy the AWS infrastructure, and `Ansible` to deploy the Kong services to the environments. `Docker` is used to package up the code in this repository and any tooling required to simplify running this demo.
+This repository uses a `Makefile` as the main entry-point to run the demo:
+
+* `AWS` is being used for cloud infrastructure
+* `Terraform` is used to deploy the AWS infra
+* `Ansible` is used deploy the Kong services to the environments
+* `Docker` is used to package up the code in this repository and any tooling required to simplify running this demo
 
 ### Prerequisites
 

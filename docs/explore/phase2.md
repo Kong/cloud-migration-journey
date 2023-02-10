@@ -3,7 +3,7 @@
 The `make kong.phase2` created:
 
 * Kong Mesh `Global Control Plane`
-* Kong Mesh `On-PreZone` using the Universal Mode deployment strategy
+* Kong Mesh `On-Prem Zone` using the Universal Mode deployment strategy
 * deployed `Dataplanes` (also referred to as SidecarProxies) to the Monolith and Runtime Instance
 
 ## Objective
@@ -65,7 +65,7 @@ In the next section, we will explore the configuration of each component more cl
 
 ## Explore Infrastructure
 
-First, open the ansible inventory file and copy the host IPs of the kuma labelled hosts:
+First, open the ansible inventory file and copy the host IPs of the kuma labeled hosts:
 
 ```console
 cat ~/.kmj/ansible/inventory.yml
