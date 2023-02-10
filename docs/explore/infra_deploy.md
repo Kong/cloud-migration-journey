@@ -8,7 +8,7 @@ _**Note:** Before diving into the tutorial, there are 2 items to highlight. This
 
 ### Description
 
-We want to brief describe all the Konnect and Kong Mesh resources that will be deployed into the AWS infrastructure.
+Let's briefly describe all the Konnect and Kong Mesh resources that will be deployed into the AWS infrastructure.
 
 All AWS resources are spun up in 1 VPC for simplicity, but the objective of the infra is to simulate on-prem and cloud environments.
 
@@ -16,13 +16,13 @@ All AWS resources are spun up in 1 VPC for simplicity, but the objective of the 
 
 The on premise environment will be contained within public subnets. Several ubuntu EC2s are created in the public subnet:
 
-* **Runtime-Instance + Kong Zone CP:** This EC2 will have the Konnect `runtime instance` process running and Kong Mesh `Universal Zone Services (Zone Control Plane, Zone Ingress, and Zone Egress)` will be deployed on this VM.
+* **Runtime-Instance + Kong Zone CP:** This EC2 will have the Konnect `runtime instance` and Kong Mesh `Universal Zone Services (Zone Control Plane, Zone Ingress, and Zone Egress)` processes deployed on it.
 
-* **Kong Mesh Global CP:** Kong Mesh requires a global control plane, the control plane will be deployed on an EC2 to demonstrate the flexibility of Universal Mode deployment strategy Kong Mesh offers.
+* **Kong Mesh Global CP:** The Kong Mesh Global Control Plane will be deployed on an EC2 to demonstrate the flexibility of Universal Mode deployment strategy Kong Mesh offers.
 
 * **Monolith:** The sample `monolith` application will be deployed on this EC2.
 
-The diagram also depictse a AWS Aurora Postgres DB. In Universal Mode, it is best practice to connect the **Kong Mesh Zone Control Plane** to a database.
+The diagram also depicts an AWS Aurora Postgres DB. In Universal Mode, it is best practice to connect the **Kong Mesh Zone Control Plane** to a database.
 
 **Cloud Environment**
 
