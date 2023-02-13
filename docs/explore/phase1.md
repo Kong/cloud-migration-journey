@@ -2,31 +2,30 @@
 
 ## Objective
 
-The `objective` of phase 1 is to focus on the on-premise environment and familiarize ourselves with Konnect, Kong's managed API Gateway Platform, and configure the Konnect Runtime Group to expose the Monolith through the Runtime Instance.
+The `objective` of phase 1 is to focus on the on-premise environment setup.  You will configure the Konnect Runtime Group to expose the Monolith through the Runtime Instance.
 
 The high level `activities` that will take place in this phase are:
 
-* Configure Konnect Runtime Group to expose the Monolith Application.
+* Configure Konnect Runtime Group to expose the monolith app.
 
-* Verify the configuration and connectivity to the Monolith through the Runtime Instance.
-
-At the end of phase 1 you should be `comfortable` with the following:
-
-* Understand how the Konnect Runtime Instance is deploy on the "on-premise" VM.
-
-* How to configure Gateway Services and Routes in a Konnect Runtime Group.
-
-* How to reach an API exposed by the the Runtime Instance.
+* Verify the configuration and connectivity to the monolith through the runtime instance.
 
 ## Architecture
 
-![Cloud Migration Tutorial - Phase 1](/docs/img/Phase_1.png)
+This is the overview of the architecture used in phase 1.
 
-Konnect, is Kong's SAAS API Platform, that gives us a singly managed control plane to deploy and manage our APIs in any environment. In this case of our Cloud Migration, we deployed our Konnect Runtime Instance to a VM in the subnet we designated as our `On-Premise Environment`. Using ansible, the deployment of the runtime instance and the monolith app were automated away.
+There are 2 VMs:
+
+1. the monolith is deployed as a docker process
+2. the konnect runtime instance is deployed also as a docker process.
+
+The Konnect Control Plane is where all the API administration happens.
+
+![Cloud Migration Tutorial - Phase 1](/docs/img/Phase_1.png)
 
 ## Explore
 
-Here we will review through the ansible inventory, ssh into the ec2-instances to quickly explore the setup, and end with configuring the Konnect Runtime Instance and validation by consuming the monolith through.
+Here we will review through the ansible inventory, ssh into the ec2-instances to quickly explore the setup, and end with configuring the Konnect runtime group and validating the monolith API can be called through the runtime instance.
 
 ### On Prem Env
 
@@ -36,7 +35,7 @@ First, let's open the ansible inventory file and grab the gateway and monolith h
 cat ~/.kmj/ansible/inventory.yml
 ```
 
-Grab the public IPs of the gateway (runtime instance) and monolith, these will be needed to configure the Konnect Gateway Service. An example of yaml is below:
+Grab the public IPs of the gateway (runtime instance) and monolith, these will be needed to configure the `Konnect Gateway Service`. An example of yaml is below:
 
 ```yaml
     gateway:
@@ -72,31 +71,32 @@ Now from your host machine ssh into the gateway (runtime instance) to check out 
 ssh -i ~/.kmj/ec2/ec2.key ubuntu@18.237.252.125
 ```
 
-With Konnect it is possible to host Runtime Instances (Kong Gateway Dataplanes) with Docker, VMs, or Kubernetes. For the purpose of this demo and simplicity we deployed our dataplane with docker. This can be validated by checking the docker containers running on the server.
+For the purpose of this demo the Konnect Runtime instance is deployed as a docker container.
 
 ```console
-$ docker ps 
+docker ps
+```
+
+You should be able to see a docker container, kong-dp, running on the VM. Example below:
+
+```console
 CONTAINER ID   IMAGE                       COMMAND                  CREATED              STATUS                        PORTS     NAMES
 ec967d53cd63   kong/kong-gateway:2.8.1.2   "/docker-entrypoint.…"   About a minute ago   Up About a minute (healthy)             kong-dp
 ```
 
-You should be able to see a docker container, kong-dp, running on the VM.
-
-Now, let's navigate up to the Konnect console to review and configure the Runtime Group.
-
 ### Configure Konnect Runtime Group
 
-`Objective`: Create a Gateway Service and Route to expose the Monolith.
+**Objective:** Create a `Gateway Service` and `Route` to expose the Monolith through the runtime instance.
 
-1. Login into [Konnect](https://cloud.konghq.com/login) and you will be directed to the Runtime Manager Page.
+1. Login into [Konnect](https://cloud.konghq.com/login) and you will be directed to the Runtime Manager Menu.
 
 ![Phase 1 - 1_runtime manager](/docs/img/phase_1/1_runtimeManager.png)
 
-2.  From the Runtime Manager Page Select the appropriate `Runtime Group` where you deployed the runtime instance &#8594; in the left hand panel navigate to `Gateway Services`
+2. From the Runtime Manager Page, select the appropriate `Runtime Group` where you deployed the runtime instance &#8594; in the left hand panel navigate to `Gateway Services`
 
-3. `Create Gateway Service` - Select the `+ New gateway service` button in the menu.
+3. In the Gateway Services Page Select the `+ New Gateway Service` button in the menu.
 
-4. `Add a new gateway service` - To configure the Gateway Service.
+4. In the `Add a new gateway service` menu - configure the Gateway Service:
 
     * Select the `Add using Protocol,Host and Path` radio button.
     
@@ -115,7 +115,9 @@ An example Gateway Service is depicted below.
     <img src="../img/phase_1/2_gatewayservice.png" width="500" /></div>
 </p>
 
-5. `Create Route` - Navigate into newly create Gateway Service `Migration` &#8594; scroll down &#8594; Add Route:
+5. When the Gateway Service is saved - you are put into a menu page describing the gateway service details.
+
+6. Next you need to `create a route` - scroll down the gateway service page until you see the `Routes` modulee &#8594; select `+ Add Route`:
 
     * Fill in the following information regarding how to expose the Monolith through the Runtime Instance:
         * **Route Name** = OnPrem
@@ -131,23 +133,21 @@ An example Route is shown below.
     <img src="../img/phase_1/3_route.png" width="400" /></div>
 </p>
 
-And now we are ready to validate we can consume the monolith application.
+And now we are ready to validate that you can consume the monolith application via the konnect runtime instance.
 
 ### Validation
 
-`Objective`: Call `On Prem Route` exposed on the Runtime Instance and validate all Monolith Web Services are returning. Mostly, important taking a look at the behavior of the Monolith Disputes API.
-
-`Requirement`: Insomnia
+`Objective`: Call `On Prem Route` exposed on the runtime instance and validate all monolith Web Services are reachable. Mostly, important taking a look at the behavior of the Monolith Disputes API.
 
 1. Open Insomnia &#8594; Navigate to Dashboard &#8594; Select `Create` dropdown in the top left &#8594; Import From `+ File` &#8594; the insomnia collection is located under `migration-journey/docs/insomnia`
 
-2. Navigate into the `Migration Journey` Collection &#8594; Open `Phase 1 - OnPrem` SubFolder
+2. Navigate into the `Migration Journey` Collection &#8594; Open `Phase 1 - OnPrem` subfolder
 
-3. For each request hit `Send`, you will be prompted for the Runtime Instance IP (your gateway IP from the ansible inventory).
+3. For each request hit `Send`, you will be prompted to copy in the Runtime Instance IP (your gateway IP from the ansible inventory).
 
 **Disputes Validation**
 
-We want to take a close look at the functionality of the `Disputes` API. In the Monolith it does not offer much functionality at the moment. Take a look at the example output below:
+We want to take a close look at the functionality of the `Disputes` API. In the monolith it does not offer much functionality at the moment. Take a look at the example output below:
 
 <p align="center">
     <img src="../img/phase_1/4_insomnia_disputes.png" width="800" /></div>
@@ -161,8 +161,8 @@ This is the functionality (or the lack of) that we want to deprecate in favor fo
 
 Just to Recap.
 
-The objective of phase 1 was to create our on-premise environment, and expose our Monolith Application to world with a Konnect Runtime Instance.
+The objective of phase 1 was to configure the on-premise environment, and protect the `monolith` with a Konnect `runtime instance`.
 
-Now that phase 1 is done, we are prepared for phase 2, where Kong Mesh will be introduced.
+In phase 2, Kong Mesh will be introduced.
 
-Please Navigate to the Home Page to proceed with [Deploy Phase 2 of the Migration](../../README.md#step-6---execute-the-cloud-migration-journey-phase-2).
+Please Navigate to the Home Page to proceed with [Deploy Phase 2 of the Migration](../../README.md#step-6---run-migration-journey-phase-2).

@@ -1,24 +1,22 @@
 # Kong Migration Journey: Phase 2
 
-The `make kong.phase2` step built out the `Kong Mesh Global Control Plane`, created a Kong Mesh `On-Premise Zone` using the Universal Mode deployment strategy, and deployed Dataplanes (also referred to as SidecarProxies) to the Monolith and Runtime Instance.
+The `make kong.phase2` created:
+
+* Kong Mesh `Global Control Plane`
+* Kong Mesh `On-Prem Zone` using the Universal Mode deployment strategy
+* Deployed `Dataplanes` (also referred to as SidecarProxies) to the monolith and Konnect runtime instance
 
 ## Objective
 
-The `objective` of Phase 2 is to being the journey with Kong Mesh by exploring the infrastructure and reconfigure Konnect so that traffic from the Runtime Instance to the Monolith flows over the mesh network.
+The `objective` of Phase 2 is to begin exploring Kong Mesh and reconfigure Konnect so that traffic from the runtime instance to the monolith flows over the mesh network.
 
-The high level `activities` that will take place in this phase are:
+The high level `activities` that will take place are:
 
-* Review Kong Mesh Global Control Plane and Zone Setup.
+* Review Kong Mesh Global Control Plane and Zone setup.
 
-* Review the Dataplane (Sidecar Proxy) deployed beside the Monolith and Runtime Instance.
+* Review the Dataplane (Sidecar Proxy) deployed beside the monolith and runtime instance.
 
-* Reconfigure Konnect for traffic between Monolith and the Runtime Instance to move over the mesh network.
-
-At the end of phase 2 you should be `comfortable` with the following:
-
-* Grasp fundamentals of Universal Mode Deployments.
-
-* How to reconfigure Konnect so traffic flows over the mesh network.
+* Reconfigure Konnect for traffic between monolith and the runtime instance to move over the mesh network.
 
 ## Architecture
 
@@ -26,20 +24,16 @@ At the end of phase 2 you should be `comfortable` with the following:
     <img src="../img/phase_2/1_reference_arch.png" width="800" /></div>
 </p>
 
-Lets review through the infrastructure.
-
 **Global Control Plane**
 
-First Kong Mesh `Global Control Plane` was deployed into an ec2-instance, but it could equally run in a Kubernetes cluster. The Global Control Plane will be responsible for:
+The Kong Mesh `Global Control Plane` in is deployed into an EC2 in `mulit-zone mode`, but it could equally have been setup in a Kubernetes cluster. The Global Control Plane is responsible for:
 
-* accepting traffic from zones
 * creating/changing/deleting any mesh policies
-* sending data to zone control planes
-* keeping an eye on all dataplanes running
+* sending configuration changes to zone control planes
 
 **Zone Services**
 
-Once, the global control plane is ready, we can deploy the Kong Mesh `Zone Control Plane`, `Zone Ingress` and `Zone Egress`.
+There several type of zone services: `Zone Control Plane`, `Zone Ingress` and `Zone Egress`.
 
 `Zone Control Plane` has 2 major functions:
 
@@ -51,22 +45,25 @@ Once, the global control plane is ready, we can deploy the Kong Mesh `Zone Contr
 
 **Dataplane Proxies**
 
-Once the zone is up an running dataplanes can be provisioned.
+Any application that intended to be a part of the mesh requires a dataplane proxy (sidecar).
 
-Any application that intended to be a part of a mesh requires a dataplane proxy (sidecar). In this case, the monolith and Runtime Instance were provisioned dataplanes. The dataplanes register with the zone control plane, and will communicate with dataplanes running in the local zone as well as communicate with zones ingress/egresses to send traffic across zones.
+In this case, the `monolith` and `runtime instance` were each provisioned dataplanes. The dataplanes register with the zone control plane, and will communicate with dataplanes running in the local zone as well as communicate with zones ingress/egresses to send traffic across zones.
 
 **Universal Mode**
-All these services were deployed as processes onto the VMs, `global control plane`, `zone cp`, `zone ingress`, `zone egress`, `dataplane`, which is referred to as Universal Mode in the Kuma Documentation. In the next section, we will explore the configuration of each component more closely.
+
+All these services were deployed as processes onto VMs, `global control plane`, `zone cp`, `zone ingress`, `zone egress`, `dataplane`, which is referred to as Universal Mode in the Kuma Documentation.
 
 ## Explore Infrastructure
 
-First, open the ansible inventory file
+In this section, we will explore the configuration of each component more closely.
+
+First, open the ansible inventory file and copy the host IPs of the kuma labeled hosts:
 
 ```console
 cat ~/.kmj/ansible/inventory.yml
 ```
 
-Grab the host IPs of the kuma labelled hosts, an example is below:
+example output below:
 
 ```yaml
     kuma-global-cp:
@@ -87,11 +84,11 @@ Grab the host IPs of the kuma labelled hosts, an example is below:
 
 **Global Control Plane GUI**
 
-The GUI is available on: `http://<Global CP IP>:5681/gui`.
+Navigate to the GUI that is available on: `http://<Global CP IP>:5681/gui`.
 
 Today the GUI behaves in `READ-ONLY` mode.
 
-The `Overview` Page is really informative. It provides the the general state of the Mesh Infrastructure: Number of Zones, Dataplanes, Deployment Strategies, License Limitations. From there you can dive into any resource configuration or services recognized as part of the mesh such as the health of Zone CP, Ingresses, and Dataplanes. 
+The `Overview` Page is really informative. It provides the general state of the Mesh Infrastructure: number of zones, dataplanes, deployment strategies. From there you can dive into any resource configuration or services recognized as part of the mesh such as the health of zone cp, ingresses, and dataplanes.
 
 <p align="center">
     <img src="../img/phase_2/2_global_cp_overview.png"/></div>
@@ -99,20 +96,19 @@ The `Overview` Page is really informative. It provides the the general state of 
 
 `Zone Sevices`
 
-For the zones, from the GUI we can see we have 1 "On-Prem" Zone, and in that Zone we have 1 Zone Ingress and 1 Zone Egress.
+For the zones, from the GUI we can see we have 1 `On-Prem` zone, and in that zone we have 1 `Zone Ingress` and 1 `Zone Egress`.
 
 <p align="center">
     <img src="../img/phase_2/3_zones.png" width="1000"/></div>
 </p>
 
-
 `Dataplanes`
 
-First - You'll notice from the GUI that Dataplanes are categorized as either `Standard` or `Gateway`. The type Gateway infers that that Mesh will allow the designated service to recieve traffic outside the Mesh, which is exactly what we need for our Runtime Instance.
+**Dataplane Type** - Dataplanes are categorized as either `Standard` or `Gateway`. The type `Gateway` infers that that mesh will allow the designated service to recieve traffic outside the Mesh, which is exactly what is needed for a runtime instance.
 
-Second - We can see what Zone the DPP is associated with within the Name of the DPP.
+**Zone** - You can see infer what zone the dataplane is associated with.
 
-Third - Tags are important. The tags are used to select the mesh behavior: deployment strategy for a new microservice release, load balancing, observability, any mesh functionality is backed by the tags.
+**Tags** - Tags are important. The tags are used in policies to drive the mesh behavior: deployment strategy for a new microservice release, load balancing, observability, any mesh functionality is driven by the tags.
 
 <p align="center">
     <img src="../img/phase_2/4_dataplanes.png" width="1000"/></div>
@@ -120,17 +116,19 @@ Third - Tags are important. The tags are used to select the mesh behavior: deplo
 
 `In Summary`
 
-The GUI is extremely informative on the state of all resources and services. The take away messages are the following:
+The take away messages are:
 
-1. The Global Control Plane is running in Multi-Zone Mode.
+1. The global control plane is running in Multi-Zone Mode.
 
-2. We created an "On-Prem" Zone.
+2. We created an "On-Prem" zone.
 
-3. We have a Zone Ingress and Zone Egress deployed in the "On-Prem" Zone.
+3. We have a zone ingress and zone egress deployed in the "On-Prem" zone.
 
-4. We have 2 Dataplanes deployed in the "On-Prem" Zone. `Standard` Dataplane is our Monolith, `Gateway` Dataplane is our Runtime Instance.
+4. We have 2 dataplanes deployed in the "On-Prem" zone.
 
 **Global Control Plane VM**
+
+Here, we will navigate the infrastructure to demystify `Universal Deployments`.
 
 SSH into the global control plane:
 
@@ -140,11 +138,15 @@ ssh -i ~/.kmj/ec2/ec2.key ubuntu@35.85.31.178
 
 Change to root user for ease of use: `sudo su`
 
-Check on how the Global Control Plane Process is running:
+Each kong mesh processes is running as systemD processes
 
-```bash
-$ systemctl status kuma-cp
+```console
+systemctl status kuma-cp
+```
 
+output:
+
+```console
 ● kuma-cp.service - Kuma Global Control Plane
      Loaded: loaded (/etc/systemd/system/kuma-cp.service; enabled; vendor preset: enabled)
      Active: active (running) since Tue 2022-10-04 21:21:37 UTC; 15h ago
@@ -159,11 +161,9 @@ Oct 04 21:21:37 ip-10-0-0-47 systemd[1]: Started Kuma Global Control Plane.
 Oct 04 21:21:37 ip-10-0-0-47 bash[9676]: kuma-cp: logs will be stored in "/tmp/kuma-cp.log"
 ```
 
-In order to run the Global Control Plane, the kuma binaries were downloaded and created a systemD sevice to run the process.
-
 **On-Prem Zone Control Plane**
 
-Now we will dive into the setup of the zones services. From the ansible inventory you'll notice the Zone CP, Zone Ingress and Egress were all created on the same VM.
+Now we will dive into the setup of the zones services. From the ansible inventory you'll notice the zone cp, zone ingress and egress were all created on the same VM.
 
 SSH into the zone cp vm:
 
@@ -173,7 +173,7 @@ ssh -i ~/.kmj/ec2/ec2.key ubuntu@18.237.252.125
 
 `Kuma-Zone-CP`
 
-Again, the Zone is the same binary as the global, as shown below
+Again, the zone is the same binary as the global, as shown below
 
 ```bash
 systemctl status kuma-zone-cp
@@ -188,7 +188,7 @@ systemctl status kuma-zone-cp
              └─221050 /home/kuma/mesh/kong-mesh-1.8.1/bin/kuma-cp --log-output-path=/tmp/kuma-cp.log run --license-path=/home/kuma/license.json
 ```
 
-But to setup the Zone requires a couple of extra attributes, `KUMA_MODE`, `ZONE_NAME`, `GLOBAL_ADDRESS`: these ENVs are articulated in the systemd file:
+But to setup the zone requires a couple of extra attributes, `KUMA_MODE`, `ZONE_NAME`, `GLOBAL_ADDRESS`: these ENVs are articulated in the systemd file:
 
 ```bash
 cat /etc/systemd/system/kuma-zone-cp.service
@@ -201,13 +201,13 @@ ExecStart = /bin/bash -c 'KUMA_MODE=zone \
 
 `Zone Ingress`
 
-The zone ingress and egress are a bit more interesting. First for Zone Ingress we need to create a ZoneIngress Resource Type that mostly describe the networking configuration. Execute the command below to review the ingress resource instantiated in your mesh:
+The zone ingress and egress are a bit more interesting.
 
 ```console
 cat /home/kuma/dataplane-ingress.yaml
 ```
 
-Will output something related to the output below:
+The output will look something like below:
 
 ```yaml
 type: ZoneIngress
@@ -221,12 +221,17 @@ networking:
     port: 30002 
 ```
 
-The lastly looking at the custom systemD service that it is actually a `kuma-dp` binary, and requires knowledge of the zone cp addr to register itself, a token to validate itself as a the expected dp, and its Zone Ingress manifest.
+Zone ingresses and egresses are actually just dataplanes and so the above yaml file is describing what address the "dataplane" will be available on.
 
-```bash
+Then last looking at the systemD service:
+
+```console
 cat /etc/systemd/system/kuma-ingress.service
-...
+```
 
+You can confirm that it is just using the `kuma-dp` binary, and requires knowledge of the zone cp addr to register itself, a token to validate itself as a the expected dp, and its zone ingress manifest.
+
+```console
 ExecStart = /usr/bin/bash -c '/home/kuma/mesh/kong-mesh-1.8.1/bin/kuma-dp \
     --log-output-path=/tmp/kuma-ingress.log run \
     --cp-address=https://10.0.0.36:5678 \   
@@ -235,20 +240,20 @@ ExecStart = /usr/bin/bash -c '/home/kuma/mesh/kong-mesh-1.8.1/bin/kuma-dp \
     --proxy-type ingress > /tmp/kuma-ingress.stdout 2> /tmp/kuma-ingress.stderr'
 ```
 
-Zone Egress is pretty similar, you can navigate that yourself to review.
+Zone egress is pretty similar, so we won't review it.
 
 **On Prem Dataplanes**
 
-Last, we want to explore the Gateway and Monolith Dataplanes.
+Last, we want to explore the runtime instance and monolith dataplanes.
 
 `Runtime Instance Dataplane`
 
-We will start with the Gateway Dataplane because the runtime instance and zone services are on the same VM.
+The runtime instance dataplane is on the same VM as the zone services.
 
-Take a look at the `Dataplane Manifest` for the Runtime Instance:
+So take a look at the `Dataplane Manifest` for the runtime instance:
 
 ```console
-cat cat /home/kuma/dataplane-nontransparent.yaml
+cat /home/kuma/dataplane-nontransparent.yaml
 ```
 
 With an output similar to below:
@@ -274,17 +279,17 @@ networking:
 
 There are a number of interesting attributes in the manifest:
 
-1. mesh - the mesh that the dataplane should join is configurable.
+**mesh** - the mesh that the dataplane should join is configurable.
 
-2. gateway - defining that the type of dataplane is a gateway. Type `delegated` means we are using an existing gateway, i.e. the runtime instance we provisioned.
+**gateway** - defines the type of dataplane as `gateway`, and type `delegated` means we are using an external gateway i.e. not the built-in one the mesh can deploy.
 
-3. outbound - this section defines how the gateway can reach services on the mesh, and again those tags are very important. For example, all traffic going out port 33033 will go to the service labeled monolith-service_svc_5000. This section is required when universal mode dataplanes are not run with `transparent-proxy`. We will not be diving into the pros/cons of transparent proxy here but in the next exercise it will impact how the Runtime Instance is reconfigured.
+**outbound** - this defines how the gateway can reach services on the mesh, and the tags are very important. This manifest specifically states, all traffic going out port 33033 will go to the service labeled monolith-service_svc_5000. This section is required when universal mode dataplanes are not run with `transparent-proxy`. We will not be diving into the pros/cons of transparent proxy here but in the next exercise it will impact how the Runtime Instance is reconfigured.
 
-Then the custom systemD service looks very similar to the ingress/egress. You can read it by executing the command: `cat /etc/systemd/system/kuma-dp.service`
+Then the systemD service looks very similar to the ingress/egress. You can read find it in: `/etc/systemd/system/kuma-dp.service`
 
 `Monolith Dataplane`
 
-ssh into the monolith server:
+ssh into the monolith server and open the dataplane manifest:
 
 ```console
 cat /home/kuma/dataplane-nontransparent.yaml
@@ -303,16 +308,16 @@ networking:
         kuma.io/service: monolith-service_svc_5000
 ```
 
-Lets compare this `Standard` Dataplane type to the Gateway type:
+This is the `Standard` Dataplane, used for all microservices except gateways.
 
-1. type - this manifest is still type Dataplane
+* **mesh** - the mesh that the dp should join is still configurable.
 
-2. mesh - the mesh that the dp should join is still configurable.
+* **type**- this manifest is still type Dataplane
 
-3. inbound - describe the inbound application it supports:
-    * port - The port the DP will listen on
-    * servicePort - the port the application is running on. Monolith is running on 8080 `docker ps` to double check this
-    * tags - how the monolith will be referenced by other applications in the mesh, or later used for canary deployments, zone failure among others.
+* **inbound** - describe the inbound application it supports:
+      * port - The port the DP will listen on
+      * servicePort - the port the application is running on. Monolith is running on 8080 `docker ps` to double check this
+      * tags - how the monolith will be referenced by other applications in the mesh, or later used for canary deployments, zone failure among others.
 
 **Summary**
 
@@ -322,37 +327,39 @@ Let's recap what just happened:
 
 1. `Global Control Plane` - is running in the cloud.
 
-2. `Zone Control Plane` - We have 1 On-Premise Zone. It is running in Univeral Mode, and it just needs to be able to reach the Global.
+2. `Zone Control Plane` - There is 1 on-prem zone. It is running in Univeral Mode, and connected to the global control plane.
 
-3. `Zone Ingress and Egress` - These are also running in Universal Mode, and need to register with its Zone Control Plane.
+3. `Zone Ingress and Egress` - There are one of each coupled to the on-prem zone.
 
-4. `Dataplanes` - there are 2 types. `Gateway` --> for the Runtime Instance so we can have North/South Traffic, and `Standard` --> for the Monolith so it can be apart of a mesh.
+4. `Dataplanes` - There are 2 types:
 
-## Activities - Update the Mesh with mTLS and Re-configure Konnect
+    * `Gateway`: for the runtime instance so we can have North/South traffic into the mesh.
+    * `Standard`: for the monolith so it can be a part of a mesh.
 
-### Update the Mesh
+## Activities - Enable the Mesh with mTLS and Re-Configure Konnect
 
-**Why are we are we updating the Mesh** - It is important to understand that for cross zone communication to be successful, mTLS needs to be enabled, along with permitting ZoneEgress traffic.
+### Enable mLTS on the Mesh
 
-For all resources creations/updates/deletions are executed on the global control plane.
+**It is important to understand that for cross zone communication to be successful, mTLS needs to be enabled, along with permitting zone egress traffic.**
 
-SSH to the global control plane to get started and change to the root user for simplicty:
+For all resources creations/updates/deletions are executed on the global control plane, so SSH to the global control plane to get started:
 
 ```console
 ssh -i ~/.kmj/ec2/ec2.key ubuntu@35.85.31.178
+sudo su 
 ```
 
-Update the `Mesh` Manifest:
+Update the `Mesh` manifest:
 
 ```console
 /home/kuma/mesh/kong-mesh-1.8.1/bin/kumactl apply -f mesh-default.yaml
 ```
 
-You can validate the changes in the Console.
+You can validate the changes in the console.
 
 ### Re-Configure Konnect
 
-Now our On-Prem Zone and Default Mesh are fully ready. We are going to log back into the Konnect to make the changes. YOu will need the outbound configuration from the Gateway Dataplane, so that is pasted below:
+Now the on-prem zone and mesh are ready. You will need the outbound configuration from the Gateway Dataplane, so that is pasted below:
 
 ```yaml
 type: Dataplane
@@ -373,13 +380,13 @@ networking:
         kuma.io/service: microservice_microservice_svc_8080
 ```
 
-Login into Konnect and navigate back to the list of gateway services. We are going to 
+Login into Konnect and navigate back to the list of gateway services:
 
-2.  From the Runtime Manager Page Select the appropriate `Runtime Group` where you deployed the runtime instance &#8594; in the left hand panel navigate to `Gateway Services`
+1. From the Runtime Manager menu, select the `Runtime Group` where you deployed the runtime instance &#8594; in the left hand panel navigate to `Gateway Services`
 
-3. `Create Gateway Service` - Select the `+ New gateway service` button in the menu.
+2. `Create Gateway Service` - Select the `+ New gateway service` button in the menu.
 
-4. `Add a new gateway service` - To configure the Gateway Service.
+3. `Add a new gateway service` - To configure the Gateway Service.
 
     * Select the `Add using Protocol,Host and Path` radio button.
     
@@ -396,7 +403,7 @@ Login into Konnect and navigate back to the list of gateway services. We are goi
     <img src="../img/phase_2/5_gatewayservice.png"/></div>
 </p>
 
-5. `Create Route` for the new Gateway Service- Navigate into newly create Gateway Service `Mesh` &#8594; scroll down &#8594; Add Route:
+5. `Create Route` for the new Gateway Service - Navigate into newly create Gateway Service `Mesh` &#8594; scroll down &#8594; Add Route:
 
     * Fill in the following information regarding how to expose the Monolith through the Runtime Instance:
         * **Route Name** = Mesh
@@ -412,16 +419,15 @@ An example Route is shown below.
     <img src="../img/phase_2/6_route.png"/></div>
 </p>
 
-With that we are ready to validate.
+With that we are ready to validate the setup.
 
 ### Validation
 
-Just to clarify what to expect - `From the perspective of the API Consumer nothing should have changed.` Onboarding and exposing the monolith through the Mesh network should have no affect to the consumer.
-An API Consumer will call the same Runtime Instance as phase 1 and expect the same responses.
+Just to clarify what to expect - `From the perspective of the API Consumer nothing should have changed.`
 
-`Requirement`: Insomnia
+Onboarding and exposing the monolith through the mesh network should have no affect to the consumer. An API Consumer will call the same Runtime Instance as phase 1 and expect the same responses.
 
-1. Navigate into the `Migration Journey` Collection &#8594; Open `Phase 1 - Mesh` SubFolder
+1. Open Insomnia &#8594; Navigate into the `Migration Journey` Collection &#8594; Open `Phase 2 and 3 - Mesh` subfolder.
 
 2. For each request hit `Send`, you will be prompted for the Runtime Instance IP (your gateway IP from the ansible inventory).
 
@@ -433,9 +439,9 @@ You will see nothing has changed from the client's perspective. Which is the exp
 
 Just to Recap.
 
-The `objective of phase 2` was create an On Prem Mesh Zone, onboard the Monolith and Runtime Instance to the Mesh, and reconfigure the Gateway so traffic flows over the Mesh.
+The `objective of phase 2` was create an on-prem mesh zone, onboard the monolith and runtime instance to the mesh, and reconfigure the Konnect so traffic flows over the Mesh.
 
-We review through:
+We reviewed through:
 
 * The installation of Kong Mesh in `Universal Mode` for the Global Control Plane, Zone Control Plane, Zone Ingresses, Zone Egresses, and Dataplanes.
 
@@ -445,8 +451,8 @@ We review through:
 
 * Validate we can still successfull call the monolith, no changes, and still no microservice.
 
-Because we are in non-transparent proxy mode we wrote a new gateway service that called: http://127.0.0.1:33033, which is the outbound defined in the Dataplane Manifest of the Gateway, that will direct traffic to the monolith.
+Because we are not using transparent proxy, the gateway was setup to reach the upstream monolith on `127.0.0.1:33033`, which is the `outbound` defined in the Dataplane manifest of the gateway.
 
-Now that phase 2 is done, we are prepared for phase 3, where we will introduce the Cloud Zone to the Mesh, and execute the cutover of the Disputes from the Monolith to the new Microservice running in Amazon EKS.
+In phase 3, the the cloud zone will be integrated, and with the mesh networking capabilities deprecate only the disputes functionality of the monolith and send that traffic to the microservice running in Amazon EKS.
 
 Please Navigate to the Home Page to proceed with [Deploy Phase 3 of the Migration](../../README.md#step-7---execute-the-cloud-migration-journey-phase-3).
