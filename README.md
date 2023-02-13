@@ -75,7 +75,7 @@ The tutorial has the following prerequisites before getting started:
 1. A Kong Enterprise license - optional.
 1. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 1. [Docker](https://docs.docker.com/engine/install/) or [Docker Desktop](https://docs.docker.com/engine/install/#desktop)
-1. [Insomnia](https://insomnia.rest/download)
+1. [Insomnia Desktop App](https://insomnia.rest/download)
 1. [Make](https://www.gnu.org/software/make/)
 
     ```bash

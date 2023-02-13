@@ -27,3 +27,6 @@ The diagram also depicts an AWS Aurora Postgres DB. In Universal Mode, it is bes
 **Cloud Environment**
 
 An AWS EKS cluster will be used to represent the cloud environment. The EKS cluster deployed is kept as minimal as possible, 2 nodes that span at least 2 availability zones, and any required infratructure including public + private subnetting, NAT Gateways etc required by EKS.
+
+
+Please Navigate to the Home Page to proceed with [Deploy Phase 1 of the Migration](../../README.md#step-5---run-migration-journey-phase-1).

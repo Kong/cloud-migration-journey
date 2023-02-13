@@ -6,23 +6,18 @@ The `objective` of phase 1 is to focus on the on-premise environment setup.  You
 
 The high level `activities` that will take place in this phase are:
 
-* Configure Konnect Runtime Group, `Default` to expose the Monolith Application.
+* Configure Konnect Runtime Group to expose the monolith app.
 
-* Verify the configuration and connectivity to the Monolith through the Runtime Instance.
-
-At the end of phase 1 you should `understand`:
-
-* How to configure Gateway Services and Routes in a Konnect Runtime Group.
-
-* How to consume an API exposed by the the Runtime Instance.
+* Verify the configuration and connectivity to the monolith through the runtime instance.
 
 ## Architecture
 
 This is the overview of the architecture used in phase 1.
 
-We have 2 VMs:
+There are 2 VMs:
+
 1. the monolith is deployed as a docker process
-2. the konnect runtime instances is deployed also as a docker process.
+2. the konnect runtime instance is deployed also as a docker process.
 
 The Konnect Control Plane is where all the API administration happens.
 
@@ -30,7 +25,7 @@ The Konnect Control Plane is where all the API administration happens.
 
 ## Explore
 
-Here we will review through the ansible inventory, ssh into the ec2-instances to quickly explore the setup, and end with configuring the Konnect Runtime Instance and validation by consuming the monolith through.
+Here we will review through the ansible inventory, ssh into the ec2-instances to quickly explore the setup, and end with configuring the Konnect runtime group and validating the monolith API can be called through the runtime instance.
 
 ### On Prem Env
 
@@ -40,7 +35,7 @@ First, let's open the ansible inventory file and grab the gateway and monolith h
 cat ~/.kmj/ansible/inventory.yml
 ```
 
-Grab the public IPs of the gateway (runtime instance) and monolith, these will be needed to configure the Konnect Gateway Service. An example of yaml is below:
+Grab the public IPs of the gateway (runtime instance) and monolith, these will be needed to configure the `Konnect Gateway Service`. An example of yaml is below:
 
 ```yaml
     gateway:
@@ -93,7 +88,7 @@ ec967d53cd63   kong/kong-gateway:2.8.1.2   "/docker-entrypoint.…"   About a mi
 
 **Objective:** Create a `Gateway Service` and `Route` to expose the Monolith through the runtime instance.
 
-1. Login into [Konnect](https://cloud.konghq.com/login) and you will be directed to the Runtime Manager Page.
+1. Login into [Konnect](https://cloud.konghq.com/login) and you will be directed to the Runtime Manager Menu.
 
 ![Phase 1 - 1_runtime manager](/docs/img/phase_1/1_runtimeManager.png)
 
@@ -142,19 +137,17 @@ And now we are ready to validate that you can consume the monolith application v
 
 ### Validation
 
-`Objective`: Call `On Prem Route` exposed on the Runtime Instance and validate all Monolith Web Services are returning. Mostly, important taking a look at the behavior of the Monolith Disputes API.
-
-`Requirement`: Insomnia
+`Objective`: Call `On Prem Route` exposed on the runtime instance and validate all monolith Web Services are reachable. Mostly, important taking a look at the behavior of the Monolith Disputes API.
 
 1. Open Insomnia &#8594; Navigate to Dashboard &#8594; Select `Create` dropdown in the top left &#8594; Import From `+ File` &#8594; the insomnia collection is located under `migration-journey/docs/insomnia`
 
-2. Navigate into the `Migration Journey` Collection &#8594; Open `Phase 1 - OnPrem` SubFolder
+2. Navigate into the `Migration Journey` Collection &#8594; Open `Phase 1 - OnPrem` subfolder
 
 3. For each request hit `Send`, you will be prompted to copy in the Runtime Instance IP (your gateway IP from the ansible inventory).
 
 **Disputes Validation**
 
-We want to take a close look at the functionality of the `Disputes` API. In the Monolith it does not offer much functionality at the moment. Take a look at the example output below:
+We want to take a close look at the functionality of the `Disputes` API. In the monolith it does not offer much functionality at the moment. Take a look at the example output below:
 
 <p align="center">
     <img src="../img/phase_1/4_insomnia_disputes.png" width="800" /></div>
@@ -168,7 +161,7 @@ This is the functionality (or the lack of) that we want to deprecate in favor fo
 
 Just to Recap.
 
-The objective of phase 1 was to configure the on-premise environment, and expose the `monolith` with a Konnect `Runtime Instance`.
+The objective of phase 1 was to configure the on-premise environment, and protect the `monolith` with a Konnect `runtime instance`.
 
 In phase 2, Kong Mesh will be introduced.
 

@@ -13,15 +13,7 @@ The high level `activities` that will take place are:
 
 * Review the Cloud Zone Setup of Kong Mesh.
 
-* Review the Dataplane (Sidecar Proxy) of the Disputes Microservice deployed in cloud.
-
 * Apply the mesh traffic policy that will re-direct disputes to the microservice.
-
-At the end of phase 3 you should `understand`:
-
-* Kubernetes Setup of a Zone and microservices.
-
-* Multi-zone behavior of Kong Mesh.
 
 ## Architecture
 
