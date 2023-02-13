@@ -80,7 +80,7 @@ variable "konnect_instance_id" {
 variable "kong_mesh_version" {
   type        = string
   description = "version of Kong Mesh that will be installed"
-  default     = "1.8.1"
+  default     = "2.1.0"
 }
 
 variable "kong_license_path" {

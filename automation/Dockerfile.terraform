@@ -1,4 +1,6 @@
-FROM hashicorp/terraform:latest as build
+ARG ARCH
+
+FROM --platform=linux/${ARCH} hashicorp/terraform:latest as build
 
 COPY ./terraform_infra/ /kmj
 
@@ -10,7 +12,7 @@ RUN cd /kmj && \
 
 
 # Now build the image
-FROM hashicorp/terraform:latest
+FROM --platform=linux/${ARCH} hashicorp/terraform:latest
 
 COPY --from=build /kmj /kmj
 
