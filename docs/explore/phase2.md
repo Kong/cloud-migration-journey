@@ -310,14 +310,14 @@ networking:
 
 This is the `Standard` Dataplane, used for all microservices except gateways.
 
-**mesh** - the mesh that the dp should join is still configurable.
+* **mesh** - the mesh that the dp should join is still configurable.
 
-**type**- this manifest is still type Dataplane
+* **type**- this manifest is still type Dataplane
 
-**inbound** - describe the inbound application it supports:
-    * port - The port the DP will listen on
-    * servicePort - the port the application is running on. Monolith is running on 8080 `docker ps` to double check this
-    * tags - how the monolith will be referenced by other applications in the mesh, or later used for canary deployments, zone failure among others.
+* **inbound** - describe the inbound application it supports:
+      * port - The port the DP will listen on
+      * servicePort - the port the application is running on. Monolith is running on 8080 `docker ps` to double check this
+      * tags - how the monolith will be referenced by other applications in the mesh, or later used for canary deployments, zone failure among others.
 
 **Summary**
 
