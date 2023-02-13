@@ -427,9 +427,7 @@ Just to clarify what to expect - `From the perspective of the API Consumer nothi
 
 Onboarding and exposing the monolith through the mesh network should have no affect to the consumer. An API Consumer will call the same Runtime Instance as phase 1 and expect the same responses.
 
-`Requirement`: Insomnia
-
-1. Navigate into the `Migration Journey` Collection &#8594; Open `Phase 1 - Mesh` subfolder
+1. Open Insomnia &#8594; Navigate into the `Migration Journey` Collection &#8594; Open `Phase 2 and 3 - Mesh` subfolder.
 
 2. For each request hit `Send`, you will be prompted for the Runtime Instance IP (your gateway IP from the ansible inventory).
 
