@@ -12,13 +12,13 @@
     - name: Set Token Creation Attributes to Ingress
       ansible.builtin.set_fact:
         token_type: "ingress"
-        token_cmd: "/home/kuma/mesh/kong-mesh-{{ km_version }}/bin/kumactl generate zone-ingress-token --zone {{ zone_name }} > {{ zone_name }}-ingress.token"
+        token_cmd: "/usr/local/bin/kumactl generate zone-ingress-token --zone {{ zone_name }} > {{ zone_name }}-ingress.token"
       when: create_ingress is defined and create_ingress| bool
 
     - name: Set Token Creation Attributes to Egress
       ansible.builtin.set_fact:
         token_type: "egress"
-        token_cmd: "/home/kuma/mesh/kong-mesh-{{ km_version }}/bin/kumactl generate zone-token --zone {{ zone_name }} --valid-for 720h --scope egress > {{ zone_name }}-egress.token"
+        token_cmd: "/usr/local/bin/kumactl generate zone-token --zone {{ zone_name }} --valid-for 720h --scope egress > {{ zone_name }}-egress.token"
       when: create_egress is defined and create_egress | bool
   run_once: true
   delegate_to: "{{ global_control_plane }}"
@@ -34,7 +34,7 @@
       ansible.builtin.shell: "{{ token_cmd }}"
       args: 
         chdir: /home/kuma/
-      when: not st_token.stat.exists
+      when: not st_token.stat.exists or st_token.stat.size == 0
     
     - name: "Get {{token_type | upper }} Token"
       ansible.builtin.shell: "cat /home/kuma/{{ zone_name }}-{{ token_type }}.token"
