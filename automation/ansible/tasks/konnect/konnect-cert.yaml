@@ -1,6 +1,5 @@
 ---
-# tasks file for runtime-instance
-
+# tasks konnect-cert
 - name: Create Runtime-Instance dir 
   ansible.builtin.file:
     path: runtime-instance
@@ -43,66 +42,57 @@
         awk '{printf "%s\\n", $0}' runtime-instance/cluster.crt
       register: cert 
     
-    - name: Create Cert Var
-      ansible.builtin.set_fact:
-        cluster_crt: "{{ cert.stdout }}"
+    - name: "Get Cert from Awk Output: {{ crt_secret }} - {{ runtime_group_name }}"
+      ansible.builtin.set_fact: 
+       crt_json: '{ "cert": "{{ cert.stdout }}" }'
     
     - debug:
-        var: cluster_crt
+        var: crt_json
 
   vars:
     ri_path: runtime-instance
 
 - name: Get Konnect Cluster Attributes
   block:
-    - name: Authenticate to Konnect
-      ansible.builtin.uri:
-        url: "https://{{ base_url }}/kauth/api/v1/authenticate"
-        method: POST
-        body_format: json
-        body: '{ "username": "{{ konnect_username }}", "password":"{{ konnect_password }}" }'
-        return_content: yes
-      register: login
+  - name: "GET Konnect Runtime Group Data - {{ runtime_group_name }}"
+    ansible.builtin.uri:
+      url: "https://{{ api_url }}/v2/runtime-groups?filter%5Bname%5D%5Beq%5D={{ runtime_group_name }}"
+      method: GET
+      return_content: yes
+      status_code: 200
+      headers:
+        Content-Type: application/json
+        accept: application/json
+        Authorization: "Bearer {{ konnect_pat }}"
+    register: cp_content
 
-    - name: login output response
-      debug: 
-        var: login
+  - name: "GET Konnect Runtime Group Data Response - {{ runtime_group_name }}"
+    ansible.builtin.debug: 
+      var: cp_content
+      verbosity: 2
 
-    - name: GET Konnect Control Plane Data
-      ansible.builtin.uri:
-        url: "https://{{ base_url }}/api/runtime_groups/{{ konnect_controlPlane }}"
-        method: GET
-        return_content: yes
-        headers:
-          Cookie: "{{ login.cookies_string }}"
-      register: cp_content
+  - name: "Control Plane Facts - {{ runtime_group_name }}"
+    ansible.builtin.set_fact:
+      konnect_cp_id: "{{ cp_content.json.data[0]['id'] }}"
+      konnect_cp_name: "{{ cp_content.json.data[0]['name']}}"
+      konnect_cp_endpoint: "{{ cp_content.json.data[0]['config']['control_plane_endpoint'] | regex_replace('https://') | regex_replace('/') }}"
+      konnect_tp_endpoint: "{{cp_content.json.data[0]['config']['telemetry_endpoint'] | regex_replace('https://') | regex_replace('/') }}"
 
-    - name: Control Plane Data
-      ansible.builtin.set_fact:
-        konnect_cp_id: "{{ cp_content.json['id'] }}"
-        konnect_cp_name: "{{ cp_content.json['name']}}"
-        konnect_cp_endpoint: "{{ cp_content.json['config']['cp_outlet'] | regex_replace('https://') | regex_replace('/') }}"
-        konnect_tp_endpoint: "{{cp_content.json['config']['telemetry_endpoint'] | regex_replace('https://') | regex_replace('/') }}"
-
-    - debug: 
-        msg: '{ "name": "{{ konnect_cp_name }}", "id" :"{{konnect_cp_id}}", "certificates": ["{{cluster_crt}}"] }'
-
-    - name: PUT Control Plane Cert to Konnect
-      ansible.builtin.uri:
-        url: "https://{{ base_url }}/api/runtime_groups/{{ konnect_controlPlane }}"
-        method: PUT
-        body_format: json
-        body: '{ "name": "{{ konnect_cp_name }}", "id" :"{{konnect_cp_id}}", "certificates": ["{{cluster_crt}}"] }'
-        headers:
-          Cookie: "{{ login.cookies_string }}"
-      register: cert_request
-    
-    - name: output cert_request
-      debug:
-        var: cert_request
+  - name: "POST Dataplane Cert to Konnect - {{ runtime_group_name }}"
+    ansible.builtin.uri:
+      url: "https://{{ api_url }}/v2/runtime-groups/{{ konnect_cp_id }}/dp-client-certificates"
+      method: POST
+      body_format: json
+      body: "{{ crt_json }}"
+      status_code: [ 201, 409 ]
+      headers:
+        Content-Type: application/json
+        accept: application/json
+        Authorization: "Bearer {{ konnect_pat }}"
+    register: cert_request
 
   vars:
-    base_url: "cloud.konghq.com"
+    api_url: "us.api.konghq.com"
 
 - name: Check if Kong Container is Running
   community.docker.docker_container_info: 
@@ -139,6 +129,3 @@
     chdir: "{{ ri_path }}"
   vars: 
     ri_path: runtime-instance
-
-
-

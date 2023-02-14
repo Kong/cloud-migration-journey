@@ -5,24 +5,15 @@
 
   tasks:
   - name: Install Pre-requisites
-    ansible.builtin.include_tasks:
-      file: tasks/ec2-reqs.yaml
+    include_tasks: tasks/ec2-reqs.yaml
   
-  - name: Install Runtime Instance 
-    ansible.builtin.import_role:
-      name: runtime-instance
+  - name: Install Konnect Runtime Instance
+    include_tasks: tasks/konnect/konnect-cert.yaml
     when: inventory_hostname in groups["gateway"]
   
   - name: Install Monolith
-    ansible.builtin.include_tasks:
-      file: tasks/start-docker.yaml
+    include_tasks: tasks/start-docker.yaml
     vars: 
       container_name: monolith
       image_tag: "{{ monolith_image_tag }}"
     when: inventory_hostname in groups["monolith"]
-  
-  - ansible.builtin.debug:
-      msg: "{{ hostvars[inventory_hostname].group_names[0] }} IP: {{ ansible_ssh_host }}"
-    loop: "{{ groups['all'] }}"
-    run_once: True
-    delegate_to: localhost
