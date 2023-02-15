@@ -1,0 +1,21 @@
+type: MeshHTTPRoute
+name: http-route-1
+mesh: default
+spec: 
+  targetRef:
+    kind: MeshService
+    name: kong
+  to:
+    - targetRef: 
+        kind: MeshService
+        name: monolith-service_svc_5000
+      rules: 
+        - matches: 
+            - path: 
+                type: Prefix
+                value: /monolith/resources/card/dispute
+          default: 
+            backendRefs: 
+              - kind: MeshService
+                name: microservice_microservice_svc_8080
+

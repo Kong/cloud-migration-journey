@@ -8,15 +8,12 @@
     - "{{ kuma_vars_file }}"
 
   tasks:
-  - name: Install Mesh Cloud Zone on k8s
-    block: 
-    - name: Install K8s Based Zone CP/Ingress/Egress 
-      ansible.builtin.include_tasks: 
-        file: tasks/mesh/mesh-k8s.yaml
-      vars:
-        km_version: "{{ kong_mesh_version }}"
-        zone: "{{ item }}"
-      loop: "{{ zones | selectattr('type', 'eq', 'k8s') | list }}"
+  - name: Install K8s Based Zone 
+    include_tasks: tasks/mesh/k8s/zone-k8s-install.yaml
+    vars:
+      km_version: "{{ kong_mesh_version }}"
+      zone: "{{ item }}"
+    loop: "{{ k8s_zones }}"
   
   - name: Install Microservices
     block:
