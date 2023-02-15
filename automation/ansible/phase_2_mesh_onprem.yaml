@@ -1,44 +1,42 @@
 ---
 - hosts: all
   vars:
-    dp_service: "kuma-dp.service"
-    egress_service: "kuma-egress.service"
     global_cp_addr: "{{ global_cp['addr'] }}"
   vars_files:
     - "{{ kuma_vars_file }}"
   
   tasks:
-  # - name: Install Kuma Requirements
-  #   include_tasks: tasks/mesh/mesh-prereqs.yaml
-  #   vars:
-  #     kong_version: "{{ kong_mesh_version }}"
+  - name: Install Kuma Requirements
+    include_tasks: tasks/mesh/mesh-prereqs.yaml
+    vars:
+      kong_version: "{{ kong_mesh_version }}"
 
-  # - name: Install Kong Mesh Global CP
-  #   include_tasks: tasks/mesh/global-cp/install.yaml
-  #   vars:
-  #     kmesh_license_path: "{{ license_path }}"
-  #     sysd_service: "kuma-cp.service"
-  #     km_version: "{{ kong_mesh_version }}"
-  #   when: inventory_hostname in groups["kuma-global-cp"]
+  - name: Install Kong Mesh Global CP
+    include_tasks: tasks/mesh/global-cp/install.yaml
+    vars:
+      kmesh_license_path: "{{ license_path }}"
+      sysd_service: "kuma-cp.service"
+      km_version: "{{ kong_mesh_version }}"
+    when: inventory_hostname in groups["kuma-global-cp"]
 
-  # - name: Push Mesh-Policies to Kong Mesh Global CP
-  #   ansible.builtin.copy:
-  #     src: mesh-policies/
-  #     dest: /home/kuma/mesh-policies/
-  #     owner: kuma
-  #     group: kuma
-  #     mode: u=rw,g=r,o=r
-  #   become: yes
-  #   when: inventory_hostname in groups["kuma-global-cp"]
+  - name: Push Mesh-Policies to Kong Mesh Global CP
+    ansible.builtin.copy:
+      src: mesh-policies/
+      dest: /home/kuma/mesh-policies/
+      owner: kuma
+      group: kuma
+      mode: u=rw,g=r,o=r
+    become: yes
+    when: inventory_hostname in groups["kuma-global-cp"]
   
-  # - name: Install Universal Zone CP
-  #   include_tasks: tasks/mesh/zone-cp/zone-cp-install.yaml
-  #   vars:
-  #     sysd_service: "kuma-zone-cp.service" 
-  #     km_version: "{{ kong_mesh_version }}"
-  #     kmesh_license_path: "{{ license_path }}"
-  #     zone: "{{ universal_zone_cps | selectattr('host', 'eq', inventory_hostname) | first }}"
-  #   when: inventory_hostname in groups["kuma-zone-cp"]
+  - name: Install Universal Zone CP
+    include_tasks: tasks/mesh/zone-cp/zone-cp-install.yaml
+    vars:
+      sysd_service: "kuma-zone-cp.service" 
+      km_version: "{{ kong_mesh_version }}"
+      kmesh_license_path: "{{ license_path }}"
+      zone: "{{ universal_zone_cps | selectattr('host', 'eq', inventory_hostname) | first }}"
+    when: inventory_hostname in groups["kuma-zone-cp"]
      
   - name: Install Universal Zone Ingress
     include_tasks: tasks/mesh/zone-ingress/ingress-install.yaml
@@ -50,27 +48,25 @@
   
   - name: Install Universal Egress
     ansible.builtin.include_tasks:
-      file: tasks/mesh/mesh-universal-egress.yaml
+      file: tasks/mesh/zone-egress/egress-install.yaml
     vars:
-      zone: "{{ zones | selectattr('type', 'eq', 'universal')  | selectattr('host', 'eq', inventory_hostname) | first }}"
-      sysd_service: "{{ egress_service }}"
+      sysd_service: "kuma-egress.service"
       km_version: "{{ kong_mesh_version }}"
-    when: inventory_hostname in groups["kuma-zone-ingress"]
+      zone: "{{ universal_zone_egress | selectattr('host', 'eq', inventory_hostname) | first }}"
+    when: inventory_hostname in groups["kuma-zone-egress"]
 
-  # - name: Install Universal Kong Gateway Dataplane
-  #   ansible.builtin.include_tasks: 
-  #     file: tasks/mesh/mesh-universal-dp.yaml
-  #   vars: 
-  #     dataplane: "{{ dataplanes | selectattr('dp_type', 'eq', 'gateway') | first }}"
-  #     sysd_service: "{{ dp_service }}"
-  #     km_version: "{{ kong_mesh_version }}"
-  #   when: inventory_hostname in groups["gateway"]
+  - name: Install Universal Kong Gateway Dataplane
+    include_tasks: tasks/mesh/dataplane/dataplane-install.yaml
+    vars: 
+      dataplane: "{{ dataplanes | selectattr('dp_type', 'eq', 'gateway') | first }}"
+      sysd_service: "kuma-dp.service"
+      km_version: "{{ kong_mesh_version }}"
+    when: inventory_hostname in groups["gateway"]
   
-  # - name: Install Universal Monolith Dataplane
-  #   ansible.builtin.include_tasks:
-  #     file: tasks/mesh/mesh-universal-dp.yaml
-  #   vars: 
-  #     dataplane: "{{ dataplanes | selectattr('name', 'eq', 'monolith') | first }}"
-  #     sysd_service: "{{ dp_service }}"
-  #     km_version: "{{ kong_mesh_version }}"
-  #   when: inventory_hostname in groups["monolith"]
+  - name: Install Universal Monolith Dataplane
+    include_tasks: tasks/mesh/dataplane/dataplane-install.yaml
+    vars: 
+      dataplane: "{{ dataplanes | selectattr('name', 'eq', 'monolith') | first }}"
+      sysd_service: "kuma-dp.service"
+      km_version: "{{ kong_mesh_version }}"
+    when: inventory_hostname in groups["monolith"]
