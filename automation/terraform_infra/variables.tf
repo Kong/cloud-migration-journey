@@ -59,22 +59,18 @@ variable "me" {
   default     = "me"
 }
 
-variable "konnect_pass" {
+
+variable "konnect_pat" {
   type        = string
-  description = "Kong Konnect instance password"
+  description = "Kong Konnect PAT"
   nullable    = false
 }
 
-variable "konnect_user" {
+variable "konnect_runtime_group_name" {
   type        = string
-  description = "Kong Konnect instance username"
+  description = "Kong Konnect Runtime Group Name"
   nullable    = false
-}
-
-variable "konnect_instance_id" {
-  type        = string
-  description = "Kong Konnect Control Plane instance ID"
-  nullable    = false
+  default     = "default"
 }
 
 variable "kong_mesh_version" {

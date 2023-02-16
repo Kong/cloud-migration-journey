@@ -1,12 +1,12 @@
 # Kong Migration Journey configuration file
-#Kong Mesh License
-kong_license_path = "<add-kong-license-path>"
-kong_mesh_version = "1.8.1"
+
+kong_mesh_version = "2.1.0"
 
 # Kong Konnect Settings
-konnect_instance_id = "<replace-me>"
-konnect_user        = "<replace-me>"
-konnect_pass        = "<replace-me>"
+konnect_pat                       = "<replace-me>"
+konnect_runtime_group_name        = "default"
+
+#AWS var to avoid collisions
 me = "<replace-me>"
 
 # AWS Infrastructure Settings
