@@ -37,7 +37,7 @@ universal_zone_egress:
 k8s_zones:
   - name: "cloud"
     type: "k8s"
-    kube_config: ${kubeconfig_path}"
+    kube_config: "${kubeconfig_path}"
 
 dataplanes:
   - name: "kong"
