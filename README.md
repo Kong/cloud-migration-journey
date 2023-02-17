@@ -52,7 +52,6 @@ Each phase has explicit technical objectives, and will build upon the previous.
 
 **Phase 3 :** Finally, in Phase 3 it's time to cutover. The objective is to deploy the Kong Mesh `cloud` zone and disputes microservices to Amazon EKS. Then execute some mesh Traffic Route polcies that will re-direct traffic to the microservice.
 
-####TODO DIAGRAM HERE
 
 ## Using this Repository
 

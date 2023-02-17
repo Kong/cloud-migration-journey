@@ -37,3 +37,22 @@
         namespace: "{{ item.ns }}"
         kubeconfig: "{{ item.kube_config }}"
       loop: "{{ dataplanes | selectattr('zone_type', 'eq', 'k8s') | list }}"
+
+  #output the demo facts for ease of use
+  - name: Print Demo Facts
+    debug: 
+      var: demo_facts
+    delegate_to: localhost
+    run_once: True
+  
+
+  - name: Last Note
+    debug: 
+      msg: [
+        "Phase 3 of Cloud Migration Journey has completed installation.",
+        "Have fun learning in Kong Konnect land.",
+        "Best Regards - ",
+        "Your Friendly Neighborhood Kong Partner Engineering Team."
+      ]
+    delegate_to: localhost
+    run_once: True

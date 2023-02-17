@@ -50,10 +50,15 @@ build:
 	@- docker rmi `docker images $(IMAGE_BASE_NAME)-ansible --format='{{.ID}}'` -f > /dev/null 2>&1
 	@echo "Building Kong Migration Journey utility containers..."
 	@read -p "Pick the Arch type?: [amd64/arm64]" arch; \
-		echo "Terraform utility container build..."; \
-		docker build --build-arg ARCH=$$arch -t $(IMAGE_BASE_NAME)-tf:$(RELEASE_TAG) -t $(IMAGE_BASE_NAME)-tf:$(DEFAULT_TAG) -f ./automation/Dockerfile.terraform ./automation/; \
-		echo "Ansible utility container build..."; \
-		docker build --build-arg ARCH=$$arch -t $(IMAGE_BASE_NAME)-ansible:$(RELEASE_TAG) -t $(IMAGE_BASE_NAME)-ansible:$(DEFAULT_TAG) -f ./automation/Dockerfile.ansible ./automation/;
+		if [ $$arch != "amd64" ] && [ $$arch != "arm64" ]; then \
+			echo "incorrect arch type"; \
+			exit 1; \
+		else \
+			echo "Terraform utility container build..."; \
+			docker build --build-arg ARCH=$$arch -t $(IMAGE_BASE_NAME)-tf:$(RELEASE_TAG) -t $(IMAGE_BASE_NAME)-tf:$(DEFAULT_TAG) -f ./automation/Dockerfile.terraform ./automation/; \
+			echo "Ansible utility container build..."; \
+			docker build --build-arg ARCH=$$arch -t $(IMAGE_BASE_NAME)-ansible:$(RELEASE_TAG) -t $(IMAGE_BASE_NAME)-ansible:$(DEFAULT_TAG) -f ./automation/Dockerfile.ansible ./automation/; \
+		fi
 	@echo "Done!"
 
 

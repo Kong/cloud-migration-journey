@@ -11,7 +11,7 @@ ARG ARCH
 COPY ./ansible /kmj
 
 # install python deps
-RUN apk add gcc libc-dev libffi-dev
+RUN apk add --no-cache gcc libc-dev libffi-dev
 RUN pip3 install --root /root/ansible/pip -r /kmj/requirements.txt
 
 # install ansible collection deps

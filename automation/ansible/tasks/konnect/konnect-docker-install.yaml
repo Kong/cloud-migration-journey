@@ -124,7 +124,7 @@
         --mount type=bind,source="$(pwd)",target=/config,readonly \
         -p 8000:8000 \
         -p 8443:8443 \
-        kong/kong-gateway:3.0.0.0
+        "kong/kong-gateway:{{ kw_version }}"
   args:
     chdir: "{{ ri_path }}"
   vars: 

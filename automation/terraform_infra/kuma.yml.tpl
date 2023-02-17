@@ -3,6 +3,7 @@ konnect_pat: "${konnect_pat}"
 runtime_group_name: "${konnect_runtime_group_name}"
 
 kong_mesh_version: ${kong_mesh_version}
+kong_gateway_version: ${kong_gateway_version}
 
 global_cp:
   addr: ${global_cp_node.public_ip}

@@ -76,11 +76,17 @@ variable "konnect_runtime_group_name" {
 variable "kong_mesh_version" {
   type        = string
   description = "version of Kong Mesh that will be installed"
-  default     = "2.1.0"
+  default     = "2.1.1"
+}
+
+variable "kong_gateway_version" {
+  type        = string
+  description = "version of Kong Gateway / Dataplane that will be deployed"
+  default     = "3.1.1.3"
 }
 
 variable "kong_license_path" {
   type        = string
   description = "path to the kong mesh license"
-  default = ""
+  default     = ""
 }

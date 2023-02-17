@@ -1,8 +1,13 @@
 # Kong Migration Journey: Phase 1
 
+The `make kong.phase1` created:
+
+* Deployed the Monolith
+* Deployed the Konnect Dataplane, also referred to as Runtime Instance or Gateway
+
 ## Objective
 
-The `objective` of phase 1 is to focus on the on-premise environment setup.  You will configure the Konnect Runtime Group to expose the Monolith through the Runtime Instance.
+The purpose of phase 1 is to focus on the on-premise environment setup.  You will configure the Konnect Runtime Group to expose the Monolith through the Runtime Instance.
 
 The high level `activities` that will take place in this phase are:
 
@@ -29,27 +34,9 @@ Here we will review through the ansible inventory, ssh into the ec2-instances to
 
 ### On Prem Env
 
-First, let's open the ansible inventory file and grab the gateway and monolith host IPs.
-
-```console
-cat ~/.kmj/ansible/inventory.yml
-```
-
-Grab the public IPs of the gateway (runtime instance) and monolith, these will be needed to configure the `Konnect Gateway Service`. An example of yaml is below:
-
-```yaml
-    gateway:
-      hosts:
-        18.237.252.125:
-    ...
-    monolith:
-      hosts:
-        35.92.105.241:
-```
-
 **Monolith**
 
-Let's ssh into the monolith to validate it is running:
+Go into the demo_facts `~/.kmj/ansible/demo_facts.json` and copy the command to ssh into the monolith:
 
 ```console
 ssh -i ~/.kmj/ec2/ec2.key ubuntu@35.92.105.241
@@ -143,7 +130,7 @@ And now we are ready to validate that you can consume the monolith application v
 
 2. Navigate into the `Migration Journey` Collection &#8594; Open `Phase 1 - OnPrem` subfolder
 
-3. For each request hit `Send`, you will be prompted to copy in the Runtime Instance IP (your gateway IP from the ansible inventory).
+3. For each request hit `Send`, you will be prompted to copy in the Runtime Instance IP (you can get this from the demo_facts.json file).
 
 **Disputes Validation**
 
