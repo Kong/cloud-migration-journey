@@ -1,7 +1,7 @@
 # Cloud Migration Journey Demo
 
 <p align="center">
-  <img src="https://2tjosk2rxzc21medji3nfn1g-wpengine.netdna-ssl.com/wp-content/uploads/2018/08/kong-combination-mark-color-256px.png" /></div>
+  <img src="https://konghq.com/wp-content/uploads/2018/08/kong-combination-mark-color-256px.png" /></div>
 </p>
 
 **Learn how Konnect and Kong Mesh can be leveraged to de-risk and lift-and-shift connections during a migration to the cloud.**
@@ -51,7 +51,6 @@ Each phase has explicit technical objectives, and will build upon the previous.
 **Phase 2 :** Deploy the Kong Mesh `control plane`, and the `on-prem` mesh zone. Then reconfigure the Konnect runtime-instance so that runtime-instance <--> monolith communication occurs over the mesh.
 
 **Phase 3 :** Finally, in Phase 3 it's time to cutover. The objective is to deploy the Kong Mesh `cloud` zone and disputes microservices to Amazon EKS. Then execute some mesh Traffic Route polcies that will re-direct traffic to the microservice.
-
 
 ## Using this Repository
 
