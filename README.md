@@ -34,9 +34,9 @@
 
 ## Cloud Migration Journey Overview
 
-The objective of this guide is to provide a self-paced demonstration of how the platform agnostic capabilites of Konnect and Kong Mesh easily enable you to migrate EKS and modernize to microservice architecture simultaneously.
+The objective of this guide is to provide a self-paced demonstration of how the platform agnostic capabilities of Konnect and Kong Mesh easily enable you to migrate EKS and modernize to micro-service architecture simultaneously.
 
-To demonstrate this we will step through the 3-phased approach that will deprecate the `disputes` feature of monolith running on premise, for a new microservice running a Kuberentes cluster.
+To demonstrate this we will step through the 3-phased approach that will deprecate the `disputes` feature of a monolith running on premise, for a new micro-service running on a Kubernetes cluster.
 
 <p align="center">
     <img src="docs/img/monolith-microservice.png" width="600"/></div>
@@ -50,7 +50,7 @@ Each phase has explicit technical objectives, and will build upon the previous.
 
 **Phase 2 :** Deploy the Kong Mesh `control plane`, and the `on-prem` mesh zone. Then reconfigure the Konnect runtime-instance so that runtime-instance <--> monolith communication occurs over the mesh.
 
-**Phase 3 :** Finally, in Phase 3 it's time to cutover. The objective is to deploy the Kong Mesh `cloud` zone and disputes microservices to Amazon EKS. Then execute some mesh Traffic Route polcies that will re-direct traffic to the microservice.
+**Phase 3 :** Finally, in Phase 3 it's time to cutover. The objective is to deploy the Kong Mesh `cloud` zone and disputes microservices to Amazon EKS. Then execute some mesh Traffic Route policies that will re-direct traffic to the micro-service.
 
 ## Using this Repository
 
@@ -68,7 +68,7 @@ The tutorial has the following prerequisites before getting started:
 1. Linux or MacOS
 1. AWS account with permissions to create VPCs, Subnets, EC2 instances, EKS Clusters, Keys, etc.
 1. A [Kong Konnect](https://cloud.konghq.com/login) free account and Runtime Group ID
-    * Credentials - email and password
+    * Credentials - [Personal Access Token](https://docs.konghq.com/konnect/getting-started/import/#generate-a-personal-access-token)
     * Control Plane Instance ID - this is described in more detail in the Kong Konnect documentation [Set up a Runtime](https://docs.konghq.com/konnect/getting-started/configure-runtime/#set-up-a-new-runtime-instance)
 1. A Kong Enterprise license - optional.
 1. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
@@ -99,7 +99,7 @@ Clone the repo:
 git clone https://github.com/Kong/cloud-migration-journey.git
 ```
 
-Navigate into `migration-journey` sub-directory:
+Navigate into `cloud-migration-journey` sub-directory:
 
 ```sh
 cd migration-journey
@@ -128,8 +128,7 @@ make prep
 This will create a `.kmj` directory in your `$HOME`, and prompt for various inputs:
 
 1. AWS CLI credentials are configured  
-2. The path to the kong license
-3. Open the Kong Migration Journey configuration file, `users.tfvars`, where you populate Kong Konnect info, and change the default AWS settings (AWS Region, VPC, Subnets).
+1. Open the Kong Migration Journey configuration file, `users.tfvars`, where you populate Kong Konnect info, and change the default AWS settings (AWS Region, VPC, Subnets).
 
 #### Step 4 - Deploy AWS Infra
 
