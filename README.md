@@ -13,22 +13,22 @@
 
 <!-- code_chunk_output -->
 
-1. [Table of Contents](#table-of-contents)
-2. [Description and purpose](#cloud-migration-journey-overview)
-    1. [Migration Journey Phases](#phases)
-3. [Using this repository](#using-this-repository)
-    1. [Prerequisites](#prerequisites)
-    2. [Getting Started](#getting-started)
-        * [Step 1 - Clone the Demo](#step-1---clone-the-demo)
-        * [Step 2 - Build Containers](#step-2---build-containers)
-        * [Step 3 - Prep](#step-3---prep-stage)
-        * [Step 4 - Deploy AWS Infra](#step-4---deploy-aws-infra)
-    3. [Tutorial](#tutorial)
-        * [Step 5 - Migration Journey Phase 1](#step-5---run-migration-journey-phase-1)
-        * [Step 6 - Migration Journey Phase 2](#step-6---run-migration-journey-phase-2)
-        * [Step 7 - Migration Journey Phase 3](#step-7---run-migration-journey-phase-3)
-    4. [Cleanup](#cleanup)
-4. [License](#license)
+1. [Table of Contents](#-table-of-contents)
+2. [Cloud Migration Journey Overview](#-cloud-migration-journey-overview)
+    1. [Phases](#-phases)
+3. [Using this Repository](#-using-this-repository)
+    1. [Prerequisites](#-prerequisites)
+    2. [Getting Started](#-getting-started)
+        1. [Step 1 - Clone the Demo](#-step-1---clone-the-demo)
+        2. [Step 2 - Build Containers](#-step-2---build-containers)
+        3. [Step 3 - Prep Stage](#-step-3---prep-stage)
+        4. [Step 4 - Deploy AWS Infra](#-step-4---deploy-aws-infra)
+    3. [Tutorial](#-tutorial)
+        1. [Step 5 - Run Migration Journey Phase 1](#-step-5---run-migration-journey-phase-1)
+        2. [Step 6 - Run Migration Journey Phase 2](#-step-6---run-migration-journey-phase-2)
+        3. [Step 7 - Run Migration Journey Phase 3](#-step-7---run-migration-journey-phase-3)
+    4. [Cleanup](#-cleanup)
+4. [License](#-license)
 
 <!-- /code_chunk_output -->
 
@@ -50,7 +50,7 @@ Each phase has explicit technical objectives, and will build upon the previous.
 
 **Phase 2 :** Deploy the Kong Mesh `control plane`, and the `on-prem` mesh zone. Then reconfigure the Konnect runtime-instance so that runtime-instance <--> monolith communication occurs over the mesh.
 
-**Phase 3 :** Finally, in Phase 3 it's time to cutover. The objective is to deploy the Kong Mesh `cloud` zone and disputes microservices to Amazon EKS. Then execute some mesh Traffic Route policies that will re-direct traffic to the micro-service.
+**Phase 3 :** Finally, in Phase 3 it's time to cutover. The objective is to deploy the Kong Mesh `cloud` zone and disputes micro-services to Amazon EKS. Then execute some mesh Traffic Route policies that will re-direct traffic to the micro-service.
 
 ## Using this Repository
 
@@ -70,7 +70,6 @@ The tutorial has the following prerequisites before getting started:
 1. A [Kong Konnect](https://cloud.konghq.com/login) free account and Runtime Group ID
     * Credentials - [Personal Access Token](https://docs.konghq.com/konnect/getting-started/import/#generate-a-personal-access-token)
     * Control Plane Instance ID - this is described in more detail in the Kong Konnect documentation [Set up a Runtime](https://docs.konghq.com/konnect/getting-started/configure-runtime/#set-up-a-new-runtime-instance)
-1. A Kong Enterprise license - optional.
 1. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 1. [Docker](https://docs.docker.com/engine/install/) or [Docker Desktop](https://docs.docker.com/engine/install/#desktop)
 1. [Insomnia Desktop App](https://insomnia.rest/download)
@@ -118,6 +117,8 @@ In this step you will build the utility containers needed to run the demo.
 ```sh
 make build
 ```
+
+> **NOTE:** You will be prompted for your computer's architecture.  If running a system that is Intel-based enter `amd64`, and if running a system that is ARM-based such as a Mac M1 processor, enter `arm64`. 
 
 #### Step 3 - Prep Stage
 
