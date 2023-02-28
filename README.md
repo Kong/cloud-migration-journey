@@ -13,22 +13,22 @@
 
 <!-- code_chunk_output -->
 
-1. [Table of Contents](#-table-of-contents)
-2. [Cloud Migration Journey Overview](#-cloud-migration-journey-overview)
-    1. [Phases](#-phases)
-3. [Using this Repository](#-using-this-repository)
-    1. [Prerequisites](#-prerequisites)
-    2. [Getting Started](#-getting-started)
-        1. [Step 1 - Clone the Demo](#-step-1---clone-the-demo)
-        2. [Step 2 - Build Containers](#-step-2---build-containers)
-        3. [Step 3 - Prep Stage](#-step-3---prep-stage)
-        4. [Step 4 - Deploy AWS Infra](#-step-4---deploy-aws-infra)
-    3. [Tutorial](#-tutorial)
-        1. [Step 5 - Run Migration Journey Phase 1](#-step-5---run-migration-journey-phase-1)
-        2. [Step 6 - Run Migration Journey Phase 2](#-step-6---run-migration-journey-phase-2)
-        3. [Step 7 - Run Migration Journey Phase 3](#-step-7---run-migration-journey-phase-3)
-    4. [Cleanup](#-cleanup)
-4. [License](#-license)
+1. [Table of Contents](#table-of-contents)
+2. [Cloud Migration Journey Overview](#cloud-migration-journey-overview)
+    1. [Phases](#phases)
+3. [Using this Repository](#using-this-repository)
+    1. [Prerequisites](#prerequisites)
+    2. [Getting Started](#getting-started)
+        1. [Step 1 - Clone the Demo](#step-1---clone-the-demo)
+        2. [Step 2 - Build Containers](#step-2---build-containers)
+        3. [Step 3 - Prep Stage](#step-3---prep-stage)
+        4. [Step 4 - Deploy AWS Infra](#step-4---deploy-aws-infra)
+    3. [Tutorial](#tutorial)
+        1. [Step 5 - Run Migration Journey Phase 1](#step-5---run-migration-journey-phase-1)
+        2. [Step 6 - Run Migration Journey Phase 2](#step-6---run-migration-journey-phase-2)
+        3. [Step 7 - Run Migration Journey Phase 3](#step-7---run-migration-journey-phase-3)
+    4. [Cleanup](#cleanup)
+4. [License](#license)
 
 <!-- /code_chunk_output -->
 
