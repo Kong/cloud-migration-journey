@@ -27,7 +27,7 @@
         1. [Step 5 - Run Migration Journey Phase 1](#step-5---run-migration-journey-phase-1)
         2. [Step 6 - Run Migration Journey Phase 2](#step-6---run-migration-journey-phase-2)
         3. [Step 7 - Run Migration Journey Phase 3](#step-7---run-migration-journey-phase-3)
-    4. [Cleanup](#cleanup)
+    4. [Clean Up](#clean-up)
 4. [License](#license)
 
 <!-- /code_chunk_output -->
@@ -173,7 +173,7 @@ make kong.phase3
 
 Navigate to the tutorial [Explore: Phase 3](docs/explore/phase3.md).
 
-### Cleanup
+### Clean Up
 
 Tear down the AWS infrastructure:
 
