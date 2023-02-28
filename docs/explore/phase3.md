@@ -126,7 +126,7 @@ Throughout the tutorial we stepped through one of the countless ways that Kong c
 * **Third** - Integrated an EKS Cluster with the Mesh network by leveraging the Multi-zone capabilities.
 * **Fourth** - Leveraging the traffic management capabilities of Kong Mesh to deprecate a service from a monolith.
 
-Essentially, what we did was created a distributed mesh network that supported the monolith and micro-services simultaneously, even though they were separated by both cloud (on premise vs cloud) providers and runtimes (VM-based monolith vs Kubernetes micro-service). What works well with this solution is the simplicity in the cut-over. When the cut-over to the new micro-service was executed, that work was centralized from the Global Control Plane.  Additionally, if something went wrong with the new micro-service, we could simply remove the policy and resume our previous operations.
+Essentially, what we did was created a distributed mesh network that supported the monolith and micro-services simultaneously, even though they were separated by both cloud (on premise vs cloud) providers and runtimes (VM-based monolith vs Kubernetes micro-service). What works well with this solution is the simplicity of the cut-over. When the cut-over to the new micro-service was executed, that work was centralized from the Global Control Plane.  Additionally, if something went wrong with the new micro-service, we could simply remove the mesh policy and resume our previous operations with the monolith until the new service is functional and ready for production.
 
 **We hope you have learned and are inspired to go forth with Kong Mesh**
 
