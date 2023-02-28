@@ -154,4 +154,4 @@ The objective of phase 1 was to configure the on-premise environment, and protec
 
 In phase 2, Kong Mesh will be introduced.
 
-Let's proceed with [Deploying Phase 2 of the Migration](../../README.md#-step-6---run-migration-journey-phase-2.md#step-6---run-migration-journey-phase-2).
+Let's proceed with [Tutorial: Step 6 - Run Migration Journey Phase 2](../../README.md#step-6---run-migration-journey-phase-2).
