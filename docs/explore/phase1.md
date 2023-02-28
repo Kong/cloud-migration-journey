@@ -3,7 +3,7 @@
 The `make kong.phase1` created:
 
 * Deployed the Monolith
-* Deployed the Konnect Data-plane, also referred to as Runtime Instance or Gateway
+* Deployed the Konnect Data-plane, also referred to as a Runtime Instance or Gateway
 
 ## Objective
 
@@ -36,7 +36,7 @@ Here we will review the Ansible inventory, SSH into the AWS EC2 instances to qui
 
 **Monolith**
 
-Go into the demo_facts `~/.kmj/ansible/demo_facts.json` and copy the command to SSH into the monolith:
+From within the demo_facts file `~/.kmj/ansible/demo_facts.json`, copy the command to SSH into the monolith `ssh_monolith` and run the command like so:
 
 ```console
 ssh -i ~/.kmj/ec2/ec2.key ubuntu@35.92.105.241
@@ -91,7 +91,7 @@ ec967d53cd63   kong/kong-gateway:2.8.1.2   "/docker-entrypoint.…"   About a mi
         * **Gateway Service Name** = `Migration`
         * **Protocol** = `http`
         * **Host** = "< *enter your monolith IP address* >"
-        >**NOTE:** *This can be obtained from the file `~/.kmj/ansible/demo_facts.json`*
+        >**NOTE:** *This can be obtained from the file `~/.kmj/ansible/demo_facts.json` and corresponds to the IP address in the `ssh_monolith` command*
         * **Path** = `/monolith/resources/` 
         >**NOTE:** *the base url of the Monolith Web Service*
         * **Port** = `8080`
@@ -132,7 +132,7 @@ Now we are ready to validate that you can consume the monolith application via t
 
 2. Navigate into the `Migration Journey` Collection &#8594; Open `Phase 1 - OnPrem` subfolder
 
-3. For each request hit `Send`, you will be prompted to copy in the Runtime Instance IP (you can get this from the `~/.kmj/demo_facts.json` file, and will be the monolith's IP address).
+3. For each request hit `Send`.  You will be prompted to enter in the Runtime Instance IP address (you can get this from the `~/.kmj/demo_facts.json` file, and will be the IP address corresponding to the `ssh_runtime_instance` command).
 
 **Disputes Validation**
 
