@@ -3,7 +3,7 @@
 The `make kong.phase1` created:
 
 * Deployed the Monolith
-* Deployed the Konnect Dataplane, also referred to as Runtime Instance or Gateway
+* Deployed the Konnect Data-plane, also referred to as Runtime Instance or Gateway
 
 ## Objective
 
@@ -21,22 +21,22 @@ This is the overview of the architecture used in phase 1.
 
 There are 2 VMs:
 
-1. the monolith is deployed as a docker process
-2. the konnect runtime instance is deployed also as a docker process.
+1. The monolith is deployed as a docker process.
+2. The konnect runtime instance is deployed also as a docker process.
 
-The Konnect Control Plane is where all the API administration happens.
+Kong Konnect is where all of the API administration happens.
 
 ![Cloud Migration Tutorial - Phase 1](/docs/img/Phase_1.png)
 
 ## Explore
 
-Here we will review through the ansible inventory, ssh into the ec2-instances to quickly explore the setup, and end with configuring the Konnect runtime group and validating the monolith API can be called through the runtime instance.
+Here we will review the Ansible inventory, SSH into the AWS EC2 instances to quickly explore the setup.  We'll finish up by configuring the Konnect runtime group and validating the monolith API can be called through the runtime instance.
 
-### On Prem Env
+### On Premise Environment
 
 **Monolith**
 
-Go into the demo_facts `~/.kmj/ansible/demo_facts.json` and copy the command to ssh into the monolith:
+Go into the demo_facts `~/.kmj/ansible/demo_facts.json` and copy the command to SSH into the monolith:
 
 ```console
 ssh -i ~/.kmj/ec2/ec2.key ubuntu@35.92.105.241
@@ -48,11 +48,11 @@ CONTAINER ID   IMAGE                      COMMAND                  CREATED      
 b6c23c5bbfb5   djfreese/monolith:latest   "/opt/eap/bin/opensh…"   4 minutes ago   Up 4 minutes   8443/tcp, 0.0.0.0:8080->8080/tcp, 8778/tcp   monolith
 ```
 
-You should see a docker container, monolith, running.
+You will see a docker container, monolith, running.
 
 **Runtime Instance**
 
-Now from your host machine ssh into the gateway (runtime instance) to check out how it is running.
+Now from your host machine, SSH into the runtime instance to observe how it is running.
 
 ```console
 ssh -i ~/.kmj/ec2/ec2.key ubuntu@18.237.252.125
@@ -64,7 +64,7 @@ For the purpose of this demo the Konnect Runtime instance is deployed as a docke
 docker ps
 ```
 
-You should be able to see a docker container, kong-dp, running on the VM. Example below:
+You will see a docker container with the name `kong-dp` running on the EC2 instance. Here's an example:
 
 ```console
 CONTAINER ID   IMAGE                       COMMAND                  CREATED              STATUS                        PORTS     NAMES
@@ -79,20 +79,22 @@ ec967d53cd63   kong/kong-gateway:2.8.1.2   "/docker-entrypoint.…"   About a mi
 
 ![Phase 1 - 1_runtime manager](/docs/img/phase_1/1_runtimeManager.png)
 
-2. From the Runtime Manager Page, select the appropriate `Runtime Group` where you deployed the runtime instance &#8594; in the left hand panel navigate to `Gateway Services`
+2. From the Runtime Manager Page, select the appropriate `Runtime Group` where you deployed the runtime instance &#8594; in the left hand panel navigate to `Gateway Services`.
 
 3. In the Gateway Services Page Select the `+ New Gateway Service` button in the menu.
 
 4. In the `Add a new gateway service` menu - configure the Gateway Service:
 
-    * Select the `Add using Protocol,Host and Path` radio button.
+    * Select the `Add using Protocol, Host and Path` radio button.
     
     * Fill in the following information regarding how to reach the backend Monolith Application:
-        * **Gateway Service Name** = Migration
-        * **Protocol** = http
-        * **Host** = "<Your Monolith IP>"
-        * **Path** = /monolith/resources/ , _note: (the base url of the Monolith Web Service)_
-        * **Port** = 8080
+        * **Gateway Service Name** = `Migration`
+        * **Protocol** = `http`
+        * **Host** = "< *enter your monolith IP address* >"
+        >**NOTE:** *This can be obtained from the file `~/.kmj/ansible/demo_facts.json`*
+        * **Path** = `/monolith/resources/` 
+        >**NOTE:** *the base url of the Monolith Web Service*
+        * **Port** = `8080`
 
     * Save the Gateway Service
 
@@ -102,15 +104,15 @@ An example Gateway Service is depicted below.
     <img src="../img/phase_1/2_gatewayservice.png" width="500" /></div>
 </p>
 
-5. When the Gateway Service is saved - you are put into a menu page describing the gateway service details.
+5. When the Gateway Service is saved - you are dropped into a menu page describing the gateway service details.
 
-6. Next you need to `create a route` - scroll down the gateway service page until you see the `Routes` modulee &#8594; select `+ Add Route`:
+6. Next you need to `Add a route` - scroll down the gateway service page until you see the `Routes` module &#8594; select `+ Add Route`:
 
     * Fill in the following information regarding how to expose the Monolith through the Runtime Instance:
-        * **Route Name** = OnPrem
-        * **Protocols** = http
-        * **Method(s)** = GET
-        * **Path(s)** = /onprem
+        * **Route Name** = `OnPrem`
+        * **Protocols** = `http`
+        * **Method(s)** = `GET`
+        * **Path(s)** = `/onprem`
 
     * Save the Route
 
@@ -120,17 +122,17 @@ An example Route is shown below.
     <img src="../img/phase_1/3_route.png" width="400" /></div>
 </p>
 
-And now we are ready to validate that you can consume the monolith application via the konnect runtime instance.
+Now we are ready to validate that you can consume the monolith application via the Konnect runtime instance.
 
 ### Validation
 
-`Objective`: Call `On Prem Route` exposed on the runtime instance and validate all monolith Web Services are reachable. Mostly, important taking a look at the behavior of the Monolith Disputes API.
+`Objective`: Call `On Prem Route` exposed on the runtime instance and validate all monolith Web Services are reachable. Most importantly, we'll be taking a look at the behavior of the Monolith Disputes API.
 
-1. Open Insomnia &#8594; Navigate to Dashboard &#8594; Select `Create` dropdown in the top left &#8594; Import From `+ File` &#8594; the insomnia collection is located under `migration-journey/docs/insomnia`
+1. Open Insomnia &#8594; Navigate to Dashboard &#8594; Select `Create` dropdown in the top left &#8594; Import From `+ File` &#8594; the insomnia collection is located under `cloud-migration-journey/docs/insomnia`
 
 2. Navigate into the `Migration Journey` Collection &#8594; Open `Phase 1 - OnPrem` subfolder
 
-3. For each request hit `Send`, you will be prompted to copy in the Runtime Instance IP (you can get this from the demo_facts.json file).
+3. For each request hit `Send`, you will be prompted to copy in the Runtime Instance IP (you can get this from the `~/.kmj/demo_facts.json` file, and will be the monolith's IP address).
 
 **Disputes Validation**
 
@@ -140,7 +142,7 @@ We want to take a close look at the functionality of the `Disputes` API. In the 
     <img src="../img/phase_1/4_insomnia_disputes.png" width="800" /></div>
 </p>
 
-This is the functionality (or the lack of) that we want to deprecate in favor for a new `Disputes Microservice` that offers more to our customers.
+This is the functionality (or the lack of) that we want to deprecate in favor for a new `Disputes Microservice` which will later offer more functionality to our customers.
 
 ## Closing and Recap
 
@@ -152,4 +154,4 @@ The objective of phase 1 was to configure the on-premise environment, and protec
 
 In phase 2, Kong Mesh will be introduced.
 
-Please Navigate to the Home Page to proceed with [Deploy Phase 2 of the Migration](../../README.md#step-6---run-migration-journey-phase-2).
+Let's proceed with [Deploying Phase 2 of the Migration](../../README#-step-6---run-migration-journey-phase-2.md#step-6---run-migration-journey-phase-2).
