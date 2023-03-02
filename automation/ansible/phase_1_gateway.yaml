@@ -5,24 +5,50 @@
 
   tasks:
   - name: Install Pre-requisites
-    ansible.builtin.include_tasks:
-      file: tasks/ec2-reqs.yaml
+    include_tasks: tasks/ec2-reqs.yaml
   
-  - name: Install Runtime Instance 
-    ansible.builtin.import_role:
-      name: runtime-instance
+  - name: Install Konnect Runtime Instance
+    include_tasks: tasks/konnect/konnect-docker-install.yaml
+    vars: 
+      kw_version: "{{ kong_gateway_version }}"
     when: inventory_hostname in groups["gateway"]
   
   - name: Install Monolith
-    ansible.builtin.include_tasks:
-      file: tasks/start-docker.yaml
+    include_tasks: tasks/start-docker.yaml
     vars: 
       container_name: monolith
       image_tag: "{{ monolith_image_tag }}"
     when: inventory_hostname in groups["monolith"]
   
-  - ansible.builtin.debug:
-      msg: "{{ hostvars[inventory_hostname].group_names[0] }} IP: {{ ansible_ssh_host }}"
-    loop: "{{ groups['all'] }}"
-    run_once: True
+  #output the demo facts for ease of use
+  - name: Build Demo Facts
+    ansible.builtin.set_fact:
+      demo_facts: 
+        global_cp_url: "http://{{ groups['kuma-global-cp'][0] }}:5681/gui"
+        ssh_global_cp: "ssh -i ~/.kmj/ec2/ec2.key ubuntu@{{ groups['kuma-global-cp'][0] }}"
+        ssh_monolith: "ssh -i ~/.kmj/ec2/ec2.key ubuntu@{{ groups['monolith'][0] }}"
+        ssh_runtime_instance: " ssh -i ~/.kmj/ec2/ec2.key ubuntu@{{ groups['gateway'][0] }}"
+
+  - name: Print Demo Facts
+    debug: 
+      var: demo_facts
     delegate_to: localhost
+    run_once: True
+  
+  - name: Print Demo Facts to Local file
+    ansible.builtin.copy: 
+      dest: "out/ansible/demo_facts.json"
+      content: "{{ demo_facts | to_nice_json }}"
+    delegate_to: localhost
+    run_once: True
+
+  - name: Last Note
+    debug: 
+      msg: [
+        "Phase 1 of Cloud Migration Journey has completed installation.",
+        "Have fun learning in Kong Konnect land.",
+        "Best Regards - ",
+        "Your Friendly Neighborhood Kong Partner Engineering Team."
+      ]
+    delegate_to: localhost
+    run_once: True

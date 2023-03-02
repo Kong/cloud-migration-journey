@@ -1,17 +1,16 @@
 ---
-# tasks file for mesh-universal-dp 
+# tasks file for dataplane-isntall
 - debug: 
     msg: "Dataplane {{ dataplane }}"
 
 - block:
-    - name: Create Dataplane Tokens
-      ansible.builtin.include_tasks: 
-        file: "tasks/mesh/dataplane-token.yaml"
+    - name: "Create Dataplane {{ dataplane['name'] }} Token"
+      include_tasks: "{{ playbook_dir }}/tasks/mesh/token/create-dataplane-token.yaml"
       vars:
         global_control_plane: "{{ global_cp_addr }}"
         service_name: "{{ dataplane['name'] }}"
 
-    - name: Put Token on Host
+    - name: "Put Dataplane {{ dataplane['name'] }} Token on Host"
       ansible.builtin.copy:
         src: "tokens/{{ dataplane['name'] }}-service.token"
         dest: "/home/kuma/{{ dataplane['name'] }}-service.token"
@@ -21,7 +20,7 @@
 
     - name: Push Gateway Dataplane Manifest
       ansible.builtin.template: 
-        src: "templates/gateway-nontransparent.yaml.j2"
+        src: "gateway-nontransparent.yaml.j2"
         dest: "/home/kuma/dataplane-nontransparent.yaml"
         owner: kuma 
         group: kuma 
@@ -35,7 +34,7 @@
 
     - name: Push Standard Dataplane Manifest
       ansible.builtin.template:
-        src: "templates/dataplane-nontransparent.yaml.j2"
+        src: "standard-nontransparent.yaml.j2"
         dest: "/home/kuma/dataplane-nontransparent.yaml"
         owner: kuma 
         group: kuma 
@@ -50,16 +49,14 @@
         
     - name: Push Kuma DP Service to Host
       ansible.builtin.template:
-        src: "templates/kuma-dp.service.j2"
-        dest: "/etc/systemd/system/kuma-dp.service"
+        src: "{{ sysd_service }}.j2"
+        dest: "/etc/systemd/system/{{ sysd_service }}"
       vars:
         zone_cp_hostname: "{{ dataplane['zone_addr'] }}"
         service: "{{ dataplane['name'] }}"
     
-    - name: Systemd Tasks
-      ansible.builtin.include_role: 
-        name: systemd
-      vars:
-       service: "{{ sysd_service }}"
+    - name: Start Dataplane Service
+      include_tasks: "{{ playbook_dir }}/tasks/systemd/systemd-start.yaml"
+      vars: 
+        service: "{{ sysd_service }}"
   become: true
-  when: dataplane['zone_type'] is defined and dataplane['zone_type'] == 'universal'

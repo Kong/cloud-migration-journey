@@ -1,14 +1,17 @@
-FROM python:3.10-alpine as build
+ARG ARCH
+
+FROM --platform=linux/${ARCH} python:3.10-alpine as build
 
 ENV PYTHONPATH=/usr/local/lib/python3.10/site-packages:/root/ansible/pip/usr/local/lib/python3.10/site-packages
 ENV PATH=/root/ansible/pip/usr/local/bin:$PATH
 ENV HELM_VER=v3.9.4
 ENV AWS_IAM_AUTHENTICATOR_VER=0.5.9
-ENV ARCH=amd64
+ARG ARCH
 
 COPY ./ansible /kmj
 
 # install python deps
+RUN apk add --no-cache gcc libc-dev libffi-dev
 RUN pip3 install --root /root/ansible/pip -r /kmj/requirements.txt
 
 # install ansible collection deps
@@ -20,14 +23,14 @@ RUN wget https://get.helm.sh/helm-${HELM_VER}-linux-${ARCH}.tar.gz \
         -O /tmp/helm.tar.gz && \
     tar -xvzf /tmp/helm.tar.gz \
         -C /tmp && \
-    mv /tmp/linux-amd64/helm /bin && \
+    mv /tmp/linux-${ARCH}/helm /bin && \
     chmod +x /bin/helm; \
     wget  https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v${AWS_IAM_AUTHENTICATOR_VER}/aws-iam-authenticator_${AWS_IAM_AUTHENTICATOR_VER}_linux_${ARCH} \
         -O /bin/aws-iam-authenticator && \
     chmod +x /bin/aws-iam-authenticator; 
 
 # Create final product
-FROM python:3.10-alpine
+FROM --platform=linux/${ARCH} python:3.10-alpine
 
 ENV PYTHONPATH=/usr/local/lib/python3.10/site-packages:/root/ansible/pip/usr/local/lib/python3.10/site-packages
 ENV PATH=/root/ansible/pip/usr/local/bin:$PATH
@@ -42,7 +45,5 @@ COPY --from=build /bin/helm /bin/helm
 COPY --from=build /bin/aws-iam-authenticator /bin/aws-iam-authenticator
 
 COPY --from=build /kmj /kmj
-
-RUN apk add --update --no-cache openssh-client
 
 ENTRYPOINT [ "ansible-playbook" ]

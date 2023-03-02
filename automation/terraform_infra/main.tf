@@ -276,18 +276,18 @@ resource "local_file" "inventory" {
 
 resource "local_file" "kuma" {
   content = templatefile("kuma.yml.tpl", {
-    kong_mesh_version    = var.kong_mesh_version,
-    kong_license_path    = var.kong_license_path,
-    kubeconfig_path      = "out/kube/kubeconfig",
-    konnect_pass         = var.konnect_pass,
-    konnect_user         = var.konnect_user,
-    konnect_controlPlane = var.konnect_instance_id,
-    global_cp_node       = aws_instance.node["kuma-global-cp"],
-    zone_node            = aws_instance.node["runtime-instance"],
-    gateway_node         = aws_instance.node["runtime-instance"],
-    monolith_node        = aws_instance.node["monolith"],
-    db_locals            = local.db,
-    db_instance          = aws_db_instance.main
+    kong_mesh_version            = var.kong_mesh_version,
+    kong_gateway_version         = var.kong_gateway_version,
+    kong_license_path            = var.kong_license_path,
+    kubeconfig_path              = "out/kube/kubeconfig",
+    konnect_pat                  = var.konnect_pat,
+    konnect_runtime_group_name   = var.konnect_runtime_group_name,
+    global_cp_node               = aws_instance.node["kuma-global-cp"],
+    zone_node                    = aws_instance.node["runtime-instance"],
+    gateway_node                 = aws_instance.node["runtime-instance"],
+    monolith_node                = aws_instance.node["monolith"],
+    db_locals                    = local.db,
+    db_instance                  = aws_db_instance.main
   })
   filename = "out/ansible/kuma.yml"
 }

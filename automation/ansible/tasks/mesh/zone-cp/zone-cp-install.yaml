@@ -19,7 +19,7 @@
   block:
     - name: Copy Kuma-Zone-CP Service
       ansible.builtin.template: 
-        src: "{{ playbook_dir }}/templates/{{ sysd_service }}.j2"
+        src: "{{ sysd_service }}.j2"
         dest: "/etc/systemd/system/{{ sysd_service }}"
       vars: 
         zone_name: '{{ zone.name }}'
@@ -40,11 +40,7 @@
       when: kmesh_license_path != ""
       
     - name: Systemd Tasks
-      ansible.builtin.include_role: 
-        name: systemd
-      vars:
+      include_tasks: "{{ playbook_dir }}/tasks/systemd/systemd-start.yaml"
+      vars: 
         service: "{{ sysd_service }}"
   become: true
-  when: 
-    - zone['type'] is defined 
-    - zone['type'] == 'universal'

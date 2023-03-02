@@ -11,7 +11,7 @@ conf:
   http:
     - match:
         path:
-          prefix: "/monolith/resources/card/dispute"
+          prefix: /monolith/resources/card/dispute
       destination:
         kuma.io/service: microservice_microservice_svc_8080
   destination:

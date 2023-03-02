@@ -11,7 +11,7 @@
 
     - name: Create Helm Values File
       ansible.builtin.template:
-        src: "{{ playbook_dir }}/templates/helm/values-kong-mesh-zone.yaml.j2"
+        src: "values-kong-mesh-zone.yaml.j2"
         dest: "{{ playbook_dir }}/vars/helm/values-kong-mesh-zone-{{zone['name']}}.yaml"
       vars: 
         global_hostname: "{{ global_cp_addr }}"

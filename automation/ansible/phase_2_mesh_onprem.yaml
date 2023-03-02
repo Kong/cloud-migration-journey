@@ -1,28 +1,21 @@
 ---
 - hosts: all
   vars:
-    global_cp_service: "kuma-cp.service"
-    zone_cp_service: "kuma-zone-cp.service"
-    dp_service: "kuma-dp.service"
-    ingress_service: "kuma-ingress.service"
-    egress_service: "kuma-egress.service"
     global_cp_addr: "{{ global_cp['addr'] }}"
   vars_files:
     - "{{ kuma_vars_file }}"
   
   tasks:
   - name: Install Kuma Requirements
-    ansible.builtin.import_role:
-      name: mesh-reqs
+    include_tasks: tasks/mesh/mesh-prereqs.yaml
     vars:
       kong_version: "{{ kong_mesh_version }}"
 
   - name: Install Kong Mesh Global CP
-    ansible.builtin.include_tasks:
-      file: tasks/mesh/mesh-universal-cp.yaml
+    include_tasks: tasks/mesh/global-cp/install.yaml
     vars:
       kmesh_license_path: "{{ license_path }}"
-      sysd_service: "{{ global_cp_service }}"
+      sysd_service: "kuma-cp.service"
       km_version: "{{ kong_mesh_version }}"
     when: inventory_hostname in groups["kuma-global-cp"]
 
@@ -37,48 +30,62 @@
     when: inventory_hostname in groups["kuma-global-cp"]
   
   - name: Install Universal Zone CP
-    ansible.builtin.include_tasks: 
-      file: tasks/mesh/mesh-universal-zone-cp.yaml
+    include_tasks: tasks/mesh/zone-cp/zone-cp-install.yaml
     vars:
-      sysd_service: "{{ zone_cp_service }}" 
+      sysd_service: "kuma-zone-cp.service" 
       km_version: "{{ kong_mesh_version }}"
       kmesh_license_path: "{{ license_path }}"
-      zone: "{{ zones | selectattr('type', 'eq', 'universal')  | selectattr('host', 'eq', inventory_hostname) | first }}"
+      zone: "{{ universal_zone_cps | selectattr('host', 'eq', inventory_hostname) | first }}"
     when: inventory_hostname in groups["kuma-zone-cp"]
-  
      
-  - name: Install Universal Ingress
-    ansible.builtin.include_tasks:
-      file: tasks/mesh/mesh-universal-ingress.yaml
+  - name: Install Universal Zone Ingress
+    include_tasks: tasks/mesh/zone-ingress/ingress-install.yaml
     vars:
-      zone: "{{ zones | selectattr('type', 'eq', 'universal')  | selectattr('host', 'eq', inventory_hostname) | first }}"
-      sysd_service: "{{ ingress_service }}"
+      sysd_service: "kuma-ingress.service"
       km_version: "{{ kong_mesh_version }}"
+      zone: "{{ universal_zone_ingress | selectattr('host', 'eq', inventory_hostname) | first }}"
     when: inventory_hostname in groups["kuma-zone-ingress"]
   
   - name: Install Universal Egress
     ansible.builtin.include_tasks:
-      file: tasks/mesh/mesh-universal-egress.yaml
+      file: tasks/mesh/zone-egress/egress-install.yaml
     vars:
-      zone: "{{ zones | selectattr('type', 'eq', 'universal')  | selectattr('host', 'eq', inventory_hostname) | first }}"
-      sysd_service: "{{ egress_service }}"
+      sysd_service: "kuma-egress.service"
       km_version: "{{ kong_mesh_version }}"
-    when: inventory_hostname in groups["kuma-zone-ingress"]
+      zone: "{{ universal_zone_egress | selectattr('host', 'eq', inventory_hostname) | first }}"
+    when: inventory_hostname in groups["kuma-zone-egress"]
 
   - name: Install Universal Kong Gateway Dataplane
-    ansible.builtin.include_tasks: 
-      file: tasks/mesh/mesh-universal-dp.yaml
+    include_tasks: tasks/mesh/dataplane/dataplane-install.yaml
     vars: 
       dataplane: "{{ dataplanes | selectattr('dp_type', 'eq', 'gateway') | first }}"
-      sysd_service: "{{ dp_service }}"
+      sysd_service: "kuma-dp.service"
       km_version: "{{ kong_mesh_version }}"
     when: inventory_hostname in groups["gateway"]
   
   - name: Install Universal Monolith Dataplane
-    ansible.builtin.include_tasks:
-      file: tasks/mesh/mesh-universal-dp.yaml
+    include_tasks: tasks/mesh/dataplane/dataplane-install.yaml
     vars: 
       dataplane: "{{ dataplanes | selectattr('name', 'eq', 'monolith') | first }}"
-      sysd_service: "{{ dp_service }}"
+      sysd_service: "kuma-dp.service"
       km_version: "{{ kong_mesh_version }}"
     when: inventory_hostname in groups["monolith"]
+
+  #output the demo facts for ease of use
+  - name: Print Demo Facts
+    debug: 
+      var: demo_facts
+    delegate_to: localhost
+    run_once: True
+  
+
+  - name: Last Note
+    debug: 
+      msg: [
+        "Phase 2 of Cloud Migration Journey has completed installation.",
+        "Have fun learning in Kong Konnect land.",
+        "Best Regards - ",
+        "Your Friendly Neighborhood Kong Partner Engineering Team."
+      ]
+    delegate_to: localhost
+    run_once: True

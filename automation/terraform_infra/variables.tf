@@ -59,32 +59,34 @@ variable "me" {
   default     = "me"
 }
 
-variable "konnect_pass" {
+
+variable "konnect_pat" {
   type        = string
-  description = "Kong Konnect instance password"
+  description = "Kong Konnect PAT"
   nullable    = false
 }
 
-variable "konnect_user" {
+variable "konnect_runtime_group_name" {
   type        = string
-  description = "Kong Konnect instance username"
+  description = "Kong Konnect Runtime Group Name"
   nullable    = false
-}
-
-variable "konnect_instance_id" {
-  type        = string
-  description = "Kong Konnect Control Plane instance ID"
-  nullable    = false
+  default     = "default"
 }
 
 variable "kong_mesh_version" {
   type        = string
   description = "version of Kong Mesh that will be installed"
-  default     = "1.8.1"
+  default     = "2.1.1"
+}
+
+variable "kong_gateway_version" {
+  type        = string
+  description = "version of Kong Gateway / Dataplane that will be deployed"
+  default     = "3.1.1.3"
 }
 
 variable "kong_license_path" {
   type        = string
   description = "path to the kong mesh license"
-  default = ""
+  default     = ""
 }

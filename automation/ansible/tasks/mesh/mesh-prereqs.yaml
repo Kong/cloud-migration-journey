@@ -32,7 +32,7 @@
   become: true
   become_user: kuma
 
-- name: Download and Install Kuma CLI
+- name: Download and Untar Kuma CLI
   block: 
     - name: Download Kuma CLI
       ansible.builtin.get_url:
@@ -43,7 +43,17 @@
       ansible.builtin.unarchive: 
         src: "/home/kuma/mesh/kong-mesh-{{kong_version}}-centos-amd64.tar.gz"
         dest: "/home/kuma/mesh"
-        remote_src: yes
+        remote_src: yes          
   become: true 
   become_user: kuma
   when: bin_stat.stat.exists == False
+
+- name: Create a symbolic link to Kuma CLI
+  ansible.builtin.file:
+    src: "/home/kuma/mesh/kong-mesh-{{kong_version}}/bin/kumactl"
+    dest: /usr/local/bin/kumactl
+    mode: '0755'
+    owner: root 
+    group: root
+    state: link
+  become: true

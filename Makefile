@@ -10,6 +10,7 @@ CONFIG_NAME ?= kmj
 IMAGE_BASE_NAME ?= kmj
 DEFAULT_TAG ?= latest
 RELEASE_TAG ?= `git rev-parse --short HEAD`
+# ARCH ?= $(shell bash -c 'read -p "Pick the arch type: [amd64/arm64]" arch; echo $$arch')
 
 # AWS
 AWS_CREDS_PATH ?= $(HOME)/.aws/credentials
@@ -48,10 +49,16 @@ build:
 	@- docker rmi `docker images $(IMAGE_BASE_NAME)-tf --format='{{.ID}}'` -f > /dev/null 2>&1
 	@- docker rmi `docker images $(IMAGE_BASE_NAME)-ansible --format='{{.ID}}'` -f > /dev/null 2>&1
 	@echo "Building Kong Migration Journey utility containers..."
-	@echo "Terraform utility container build..."
-	@docker build ./automation/ -t $(IMAGE_BASE_NAME)-tf:$(RELEASE_TAG) -t $(IMAGE_BASE_NAME)-tf:$(DEFAULT_TAG) -f ./automation/Dockerfile.terraform
-	@echo "Ansible utility container build..."
-	@docker build ./automation -t $(IMAGE_BASE_NAME)-ansible:$(RELEASE_TAG) -t $(IMAGE_BASE_NAME)-ansible:$(DEFAULT_TAG) -f ./automation/Dockerfile.ansible
+	@read -p "Pick the Arch type?: [amd64/arm64]" arch; \
+		if [ $$arch != "amd64" ] && [ $$arch != "arm64" ]; then \
+			echo "incorrect arch type"; \
+			exit 1; \
+		else \
+			echo "Terraform utility container build..."; \
+			docker build --build-arg ARCH=$$arch -t $(IMAGE_BASE_NAME)-tf:$(RELEASE_TAG) -t $(IMAGE_BASE_NAME)-tf:$(DEFAULT_TAG) -f ./automation/Dockerfile.terraform ./automation/; \
+			echo "Ansible utility container build..."; \
+			docker build --build-arg ARCH=$$arch -t $(IMAGE_BASE_NAME)-ansible:$(RELEASE_TAG) -t $(IMAGE_BASE_NAME)-ansible:$(DEFAULT_TAG) -f ./automation/Dockerfile.ansible ./automation/; \
+		fi
 	@echo "Done!"
 
 
@@ -69,15 +76,6 @@ prep:
 		printf "Default terraform customization variables exist, not copying...\n"; \
 	fi
 	@printf "\nDone!\n\nCustomizing your Kong Migration Journey configuration...\n"
-	@echo "First: Please Provide the Path to your Kong License. If no license please leave it blank"; read KONG_LICENSE; \
-		if [ ! -z "$$KONG_LICENSE" ]; then \
-			cp $$KONG_LICENSE $(HOME)/.$(CONFIG_NAME)/kong/; \
-			file=$$(basename $$KONG_LICENSE); \
-			sed -i '' "s~<add-kong-license-path>~out/kong/$$file~g" $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS); \
-		else \
-			sed -i '' "s~<add-kong-license-path>~~g" $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS); \
-		fi 
-	@printf "\n\Done, Second: Customize the the Kong Migration Journey configuration"
 	@$(KMJ_EDITOR) $(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)
 	@printf "\nDone!\n\n"
 	@printf "To customize your demo infrastructure again, you can always edit:\n$(HOME)/.$(CONFIG_NAME)/tf/$(TF_VARS)\n\nDone!\n\n"

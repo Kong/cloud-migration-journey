@@ -1,0 +1,48 @@
+---
+# tasks file for ingress-install
+      
+- name: Install Ingress Dataplane
+  block:
+    - name: Create Ingress Tokens
+      include_tasks: "{{playbook_dir}}/tasks/mesh/token/create-zone-token.yaml"
+      vars:
+        global_control_plane: "{{ global_cp_addr }}"
+        token_type: ingress
+        zone_name: "{{ zone['name'] }}" 
+      
+    - name: "Put {{ token_type | upper }} Tokens on Filesystem"
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/tokens/{{ zone.name }}-{{ token_type }}.token"
+        dest: "/home/kuma/{{ token_type }}.token"
+        owner: kuma 
+        group: kuma
+        mode: '0644'
+      vars:
+        token_type: ingress
+    
+    - name: "Copy the {{ sysd_service }} Services"
+      ansible.builtin.template: 
+        src: "{{ sysd_service }}.j2"
+        dest: "/etc/systemd/system/{{ sysd_service }}"
+      vars:
+        zone_cp_hostname: "{{ zone['zone_cp_addr'] }}"
+            
+    - name: Copy Ingress Dataplane Manifests 
+      ansible.builtin.template: 
+        src: "dataplane-ingress.yaml.j2"
+        dest: "/home/kuma/dataplane-ingress.yaml"
+        owner: kuma 
+        group: kuma 
+        mode: '0644'
+      vars: 
+        dp_addr: "{{ zone['dp_addr'] }}"
+        dp_advertised_ip: "{{ zone['dp_advertised_ip'] }}"
+        zone_name: "{{ zone['name'] }}"
+
+    - name: Start Ingress Systemd
+      include_tasks: "{{ playbook_dir }}/tasks/systemd/systemd-start.yaml"
+      vars: 
+        service: "{{ sysd_service }}"
+  become: true
+
+    
