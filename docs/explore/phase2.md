@@ -316,7 +316,7 @@ ssh -i ~/.kmj/ec2/ec2.key ubuntu@35.85.31.178
 Update the `Mesh` manifest:
 
 ```console
-sudo kumactl apply -f /home/kuma/mesh-policies/phase2/mesh-default.yaml
+sudo kumactl apply -f /home/kuma/mesh-policies/phase2/mesh.yaml
 ```
 
 From the global control plane console you will now see that mTLS is enabled, and using the built-in CA.

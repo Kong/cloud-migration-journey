@@ -100,7 +100,7 @@ module "eks" {
   version = "18.26.6"
 
   cluster_name    = local.cluster_name
-  cluster_version = "1.22"
+  cluster_version = var.eks.cluster_version
 
   vpc_id     = module.vpc_eks.vpc_id
   subnet_ids = module.vpc_eks.private_subnets
@@ -235,6 +235,7 @@ resource "aws_db_subnet_group" "main" {
 resource "aws_db_instance" "main" {
   allocated_storage   = 20
   engine              = "postgres"
+  engine_version       = "14.8"
   instance_class      = "db.t3.micro"
   db_name             = local.db.name
   username            = local.db.username

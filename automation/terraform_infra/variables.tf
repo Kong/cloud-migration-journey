@@ -44,12 +44,14 @@ variable "eks" {
   type = object({
     private_subnets = list(string),
     public_subnets  = list(string),
-    az              = list(string)
+    az              = list(string),
+    cluster_version = string
   })
   default = {
     private_subnets = ["10.0.0.128/26", "10.0.0.192/26"],
     public_subnets  = ["10.0.1.0/26", "10.0.1.64/26"],
-    az              = ["us-west-2a", "us-west-2b"]
+    az              = ["us-west-2a", "us-west-2b"], 
+    cluster_version = "1.27"
   }
 }
 
